@@ -1,0 +1,103 @@
+import tkinter as tk
+import src.var as var
+from tkinter import font
+import src.fct_main as fct_main
+import src.sous_fenetre as sfenetre
+from tkinter import ttk
+
+#### Frame Haut ####
+def creer_frame_haut(master):
+    frame_haut = tk.Frame(master=master, height=50, bg=var.bg_frame_haut, padx=5, pady=5)
+    frame_haut.pack(fill=tk.X)
+    return frame_haut
+#### Frame Main ####
+def creer_frame_main(master):
+    frame_main = tk.Frame(master=master, bg=var.bg_frame_mid, padx=5, pady=5)
+    frame_main.pack(fill=tk.BOTH, expand=True)
+    return frame_main
+#### Frame Main ####
+def creer_frame_bas(master):
+    frame_bas = tk.Frame(master=master, width=25, height=25, bg=var.bg_frame_haut, padx=5, pady=5)
+    frame_bas.pack(fill=tk.X)
+    return frame_bas
+#### Frame Main ####
+def creer_sous_frames(frame_main):
+    frame1 = tk.Frame(master=frame_main, bg=var.bg_frame_droit, padx=0, pady=0, width=100, relief=tk.SUNKEN)
+    frame1.pack(fill=tk.BOTH, side=tk.LEFT)
+    frame2 = tk.Frame(master=frame_main, bg=var.bg_frame_droit, padx=5, pady=5)
+    frame2.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
+
+    return frame1, frame2
+
+def creer_bouton_haut():
+
+    for widget in var.frame_haut.winfo_children():
+        widget.destroy()
+    frame_boutons = tk.Frame(var.frame_haut, bg=var.bg_frame_haut)
+    frame_boutons.pack(expand=True)
+    if var.nom != "":
+        ttk.Button(frame_boutons, text="Résumé", command=lambda: sfenetre.fenetre_chapitre_resume(var.chapitre), width=10).pack(side="left", padx=2, pady=2)
+        ttk.Button(frame_boutons, text="Personnages", command=sfenetre.fenetre_perso, width=10).pack(side="left", padx=2, pady=2)
+        ttk.Button(frame_boutons, text="Lieux", command=var.frame_haut, width=10).pack(side="left", padx=2, pady=2)
+    else:
+        ttk.Button(frame_boutons, text="Nouveau projet", command=fct_main.projet_new, width=15).pack(side="left", padx=2, pady=2)
+        ttk.Button(frame_boutons, text="Ouvrir projet", command=fct_main.open_projet, width=15).pack(side="left", padx=2, pady=2)
+
+def creer_toolbar(parent):
+    toolbar = tk.Frame(parent)
+    toolbar.pack(side="top", fill="x")
+    return toolbar
+
+def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl):
+    bold_button = ttk.Button(toolbar, text="Gras", command=toggle_bold)
+    bold_button.pack(side="left", padx=2, pady=2)
+    italic_button = ttk.Button(toolbar, text="Italique", command=toggle_italic)
+    italic_button.pack(side="left", padx=2, pady=2)
+    sl_button = ttk.Button(toolbar, text="Sousligné", command=toggle_sl)
+    sl_button.pack(side="left", padx=2, pady=2)
+    return bold_button, italic_button, sl_button
+
+def creer_zone_texte(parent):
+    text_widget = tk.Text(parent, wrap="word", undo=True)
+    text_widget.config(font=("Comic Sans MS", 12),  padx=20, pady=20, spacing1=0, spacing2=8, spacing3=0)
+    text_widget.pack(expand=True, fill="both")
+    return text_widget
+
+def projet_new():
+    fct_main.projet_new()
+
+def rac_s(ev=None):
+    fct_main.save_projet()
+
+def projet_open():
+    fct_main.open_projet()
+
+def projet_save():
+    return
+
+def create_menu(fenetre, frame_haut):
+    menubar = tk.Menu(fenetre)
+    menu1 = tk.Menu(menubar, tearoff=0)
+    menu1.add_command(label="Nouveau projet", command=projet_new)
+    menu1.add_command(label="Ouvrir un Projet", command=projet_open)
+    menu1.add_command(label="Sauvegarder  ctrl+s", command=rac_s)
+    menubar.add_cascade(label="Fichier", menu=menu1)
+
+    menu2 = tk.Menu(menubar, tearoff=0)
+    menu2.add_command(label="Général", command="paramGene")
+    menubar.add_cascade(label="Paramètres", menu=menu2)
+
+    menubar.bind_all('<Control-s>', rac_s)
+
+    return menubar
+def creer_label_version(frame_bas):
+    lab_version = tk.Label(master=frame_bas, bg=var.bg_frame_haut, text="ScryBook version :" + var.version)
+    lab_version.grid(row=0, column=1, padx=5, pady=5)
+    return lab_version
+
+def configurer_tags_texte(text_widget):
+    text_widget.tag_configure("bold", font=font.Font(weight="bold"))
+    text_widget.tag_configure("italic", font=font.Font(slant="italic"))
+def update_label_nom(new_text):
+    var.lab_nom_projet.config(text=new_text)
+
