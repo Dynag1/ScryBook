@@ -33,12 +33,24 @@ class main:
         design.creer_bouton_haut()
         self.but_chapitre = ttk.Button(self.frame1, text="Nouveau chapitre", command=fct_main.nouveau_chapitre).grid(row=1, column=0, padx=5, pady=5)
 
-        var.list_chapitre = ttk.Treeview(self.frame1, height=10, columns=("ID", "Nom"), show="headings")
-        var.list_chapitre.column("ID",  stretch=FALSE, width=0)
-        var.list_chapitre.column("Nom",  stretch=TRUE, width=150)
+        var.list_chapitre = ttk.Treeview(self.frame1, height=10, columns=("ID", "Numero", "Nom"), show="headings")
+
+        # Configuration des en-têtes
+        var.list_chapitre.heading("ID", text="ID")
+        var.list_chapitre.heading("Numero", text="Numéro")
+        var.list_chapitre.heading("Nom", text="Nom")
+
+        # Configuration des colonnes
+        var.list_chapitre.column("ID", width=0, stretch=tk.NO)
+        var.list_chapitre.column("Numero", width=50, stretch=tk.NO)
+        var.list_chapitre.column("Nom", width=100, stretch=tk.YES)
+
+        # Liaison des événements
         var.list_chapitre.bind('<ButtonRelease-1>', self.item_selected)
-        var.list_chapitre.bind('<3>', self.right_clic)
+        var.list_chapitre.bind('<Button-3>', self.right_clic)
         var.list_chapitre.bind('<Double-1>', lambda e: self.resume())
+
+        # Positionnement du Treeview
         var.list_chapitre.grid(row=2, column=0, padx=5, pady=5)
 
         self.toolbar = design.creer_toolbar(self.frame2)

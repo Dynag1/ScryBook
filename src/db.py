@@ -9,34 +9,52 @@ import tkinter as tk
 ##### Créer la table des chapitres #####
 def creer_table_chapitre(chemin):
     # Connexion à la base de données (elle sera créée si elle n'existe pas)
-    conn = sqlite3.connect(chemin+'/dbchapitre')
+    conn = sqlite3.connect(chemin + '/dbchapitre')
 
     # Création d'un objet curseur pour exécuter les commandes SQL
     cursor = conn.cursor()
 
-    # Création de la table avec les colonnes id, nom et resume
-    cursor.execute('''CREATE TABLE IF NOT EXISTS chapitre (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nom TEXT NOT NULL,
-        resume TEXT NOT NULL
-    )''')
+    # Vérification de l'existence de la table
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='chapitre'")
+    table_existe = cursor.fetchone()
+
+    if not table_existe:
+        # Création de la table si elle n'existe pas
+        cursor.execute('''CREATE TABLE chapitre (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nom TEXT NOT NULL,
+            numero TEXT NOT NULL,
+            resume TEXT NOT NULL
+        )''')
+    else:
+        # Vérification et ajout des colonnes manquantes si la table existe déjà
+        colonnes_existantes = [row[1] for row in cursor.execute("PRAGMA table_info(chapitre)").fetchall()]
+
+        if 'nom' not in colonnes_existantes:
+            cursor.execute("ALTER TABLE chapitre ADD COLUMN nom TEXT NOT NULL DEFAULT ''")
+
+        if 'numero' not in colonnes_existantes:
+            cursor.execute("ALTER TABLE chapitre ADD COLUMN numero TEXT NOT NULL DEFAULT ''")
+
+        if 'resume' not in colonnes_existantes:
+            cursor.execute("ALTER TABLE chapitre ADD COLUMN resume TEXT NOT NULL DEFAULT ''")
 
     # Validation des changements et fermeture de la connexion
     conn.commit()
     conn.close()
 ##### Nouveau Chapitre #####
-def new_chapitre(nom, resume):
+def new_chapitre(nom, resume, numero):
     conn = sqlite3.connect(var.dossier_projet+"/dbchapitre")
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO chapitre (nom, resume) VALUES (?, ?)", (nom, resume))
+    cursor.execute("INSERT INTO chapitre (nom, resume, numero) VALUES (?, ?, ?)", (nom, resume, numero))
     conn.commit()
     conn.close()
     liste_chapitre()
 ##### Mise à jour chapitre #####
-def update_chapitre(nom, resume, id):
+def update_chapitre(nom, resume, numero, id):
     conn = sqlite3.connect(var.dossier_projet+"/dbchapitre")
     cursor = conn.cursor()
-    cursor.execute("UPDATE chapitre SET nom = ?, resume = ? WHERE id = ?", (nom, resume, id))
+    cursor.execute("UPDATE chapitre SET nom = ?, resume = ?, numero = ? WHERE id = ?", (nom, resume, numero, id))
     conn.commit()
     conn.close()
     liste_chapitre()
@@ -53,7 +71,7 @@ def liste_chapitre():
         fct_main.logs(e)
     # Récupération des données
     try:
-        cursor.execute("SELECT * FROM chapitre")
+        cursor.execute("SELECT * FROM chapitre ORDER BY numero")
         donnees = cursor.fetchall()
     except Exception as e:
         print(e)
@@ -61,7 +79,8 @@ def liste_chapitre():
     for item in var.list_chapitre.get_children():
         var.list_chapitre.delete(item)
     for ligne in donnees:
-        var.list_chapitre.insert("", tk.END, values=ligne)
+        valeurs_reordonnees = (ligne[0], ligne[3], ligne[1])
+        var.list_chapitre.insert("", tk.END, values=valeurs_reordonnees)
 
     # Fermeture de la connexion
     conn.close()

@@ -4,7 +4,7 @@ from tkinter import font
 import src.fct_main as fct_main
 import src.sous_fenetre as sfenetre
 from tkinter import ttk
-
+import src.export_pdf as export_pdf
 #### Frame Haut ####
 def creer_frame_haut(master):
     frame_haut = tk.Frame(master=master, height=50, bg=var.bg_frame_haut, padx=5, pady=5)
@@ -86,6 +86,10 @@ def create_menu(fenetre, frame_haut):
     menu2 = tk.Menu(menubar, tearoff=0)
     menu2.add_command(label="Général", command="paramGene")
     menubar.add_cascade(label="Paramètres", menu=menu2)
+
+    menu3 = tk.Menu(menubar, tearoff=0)
+    menu3.add_command(label="PDF", command=lambda : export_pdf.export())
+    menubar.add_cascade(label="Export", menu=menu3)
 
     menubar.bind_all('<Control-s>', rac_s)
 

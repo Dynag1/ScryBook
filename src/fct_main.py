@@ -81,6 +81,7 @@ def open_projet():
                 var.nom = valeur
         var.dossier_projet = var.path+"/"+var.nom
         db.creer_table_gene(var.dossier_projet)
+        db.creer_table_chapitre(var.dossier_projet)
         update_label_nom(var.nom)
         design.creer_bouton_haut()
         db.liste_chapitre()

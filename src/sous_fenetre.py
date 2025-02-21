@@ -17,21 +17,30 @@ def fenetre_chapitre():
     frame = ttk.Frame(sous_fenetre, padding="10")
     frame.pack(fill=tk.BOTH, expand=True)
     # Label "Nom"
-    ttk.Label(frame, text="Nom:").grid(row=0, column=0, sticky=tk.W, pady=5)
+    # Label "Nom"
+    ttk.Label(frame, text="Numéro:").grid(row=0, column=0, sticky=tk.W, pady=5)
+    # Champ de saisie pour le nom
+    input_numero = ttk.Entry(frame)
+    input_numero.grid(row=0, column=1, sticky=tk.EW, pady=5)
+    ttk.Label(frame, text="Nom:").grid(row=0, column=2, sticky=tk.W, pady=5)
     # Champ de saisie pour le nom
     input_nom = ttk.Entry(frame)
-    input_nom.grid(row=0, column=1, sticky=tk.EW, pady=5)
+    input_nom.grid(row=0, column=3, sticky=tk.EW, pady=5)
+
     ttk.Label(frame, text="Résumé:").grid(row=1, column=0, columnspan=2, sticky=tk.W, pady=5)
     text_widget = (tk.Text(frame, wrap="word", undo=True))
     text_widget.grid(row=2, column=0, columnspan=2, pady=10)
     # Bouton de validation
-    ttk.Button(frame, text="Valider", command=lambda: valider_nom_chapitre(input_nom, text_widget, sous_fenetre)).grid(row=3, column=0, columnspan=2, pady=10)
+    ttk.Button(frame, text="Valider", command=lambda: valider_nom_chapitre(input_nom, text_widget, input_numero, sous_fenetre)).grid(row=3, column=0, columnspan=2, pady=10)
 ##### Enregistrer le chapitre #####
-def valider_nom_chapitre(nom, text_widget, fenetre):
+def valider_nom_chapitre(nom, text_widget, numero, fenetre):
     nom = nom.get()
+    numero = numero.get()
     resume = text_widget.get("1.0", tk.END).strip()
-    db.new_chapitre(nom, resume)
+    db.new_chapitre(nom, resume, numero)
+    db.liste_chapitre()
     fenetre.destroy()
+
 ##### Afficher le chapitre #####
 def fenetre_chapitre_resume(id):
     sous_fenetre = tk.Toplevel()
@@ -47,12 +56,20 @@ def fenetre_chapitre_resume(id):
     frame.pack(fill=tk.BOTH, expand=True)
     nom = db.lire("chapitre", id, "nom")
     resume = db.lire("chapitre", id, "resume")
+    numero = db.lire("chapitre", id, "numero")
     # Label "Nom"
-    ttk.Label(frame, text="Nom:").grid(row=0, column=0, sticky=tk.W, pady=5)
+    ttk.Label(frame, text="Numéro:").grid(row=0, column=0, sticky=tk.W, pady=5)
+    # Champ de saisie pour le nom
+    input_numero = ttk.Entry(frame)
+    input_numero.grid(row=0, column=1, sticky=tk.EW, pady=5)
+    input_numero.insert(0, numero)
+
+    ttk.Label(frame, text="Résumé:").grid(row=1, column=0, columnspan=4, sticky=tk.W, pady=5)
+    ttk.Label(frame, text="Nom:").grid(row=0, column=2, sticky=tk.W, pady=5)
 
     # Champ de saisie pour le nom
     input_nom = ttk.Entry(frame)
-    input_nom.grid(row=0, column=1, sticky=tk.EW, pady=5)
+    input_nom.grid(row=0, column=3, sticky=tk.EW, pady=5)
     input_nom.insert(0, nom)
     ttk.Label(frame, text="Résumé:").grid(row=1, column=0, columnspan=2, sticky=tk.W, pady=5)
 
@@ -66,11 +83,12 @@ def fenetre_chapitre_resume(id):
     text_widget.mark_set(tk.INSERT, '1.0')
     text_widget.see(tk.INSERT)
     # Bouton de validation
-    ttk.Button(frame, text="Mettre a jour", command=lambda: update_nom_chapitre(input_nom.get(), text_widget.get("1.0", tk.END), id, sous_fenetre)).grid(
+    ttk.Button(frame, text="Mettre a jour", command=lambda: update_nom_chapitre(input_nom.get(), text_widget.get("1.0", tk.END), input_numero.get(), id, sous_fenetre)).grid(
         row=3, column=0, columnspan=2, pady=10)
 ##### Enregistrer le chapitre #####
-def update_nom_chapitre(nom, resume, id, fenetre):
-    db.update_chapitre(nom, resume, id)
+def update_nom_chapitre(nom, resume, numero, id, fenetre):
+    db.update_chapitre(nom, resume, numero, id)
+    db.liste_chapitre()
     fenetre.destroy()
 #################################################
 ##### Persos                                #####
