@@ -11,6 +11,8 @@ import src.var as var
 import src.design as design
 import src.db as db
 import src.sous_fenetre as s_fenetre
+
+
 #####################################################
 ##### Divers                                   #####
 #####################################################
@@ -85,9 +87,17 @@ def open_projet():
         update_label_nom(var.nom)
         design.creer_bouton_haut()
         db.liste_chapitre()
+        design.create_menu()
+        var.param_police = db.tab_param_lire("police")
+        var.param_taille = db.tab_param_lire("taille")
+        var.info_auteur = db.tab_info_lire("auteur")
+        var.info_date = db.tab_info_lire("date")
+        var.info_resume = db.tab_info_lire("resume")
+        print(var.app_instance)
+        var.app_instance.update_text_widget()
+        var.app_instance.update_menu()
         thread = threading.Thread(target=enregistrement_auto)
         thread.start()
-        print("Dossier "+var.dossier_projet)
 ##### Update le Nom du projet #####
 def update_label_nom(new_text):
     var.lab_nom_projet.config(text=new_text)

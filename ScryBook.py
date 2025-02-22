@@ -6,23 +6,25 @@ import src.fct_main as fct_main
 import src.design as design
 import src.sous_fenetre as sfenetre
 
+
+
+global app_instance
+app_instance = None
 def quitter():
     os._exit(0)
 
 class main:
 
-
     def __init__(self, master):
-
-        fct_main.creer_dossier("Projets")
-
+        global app_instance
         self.master = master
+        var.app_instance = self
         master.title(var.nom)
         master.geometry("800x600")
         master.iconbitmap('src/logoSb.ico')
         master.state('zoomed')
-
-
+        print(app_instance)
+        fct_main.creer_dossier("Projets")
         var.frame_haut = design.creer_frame_haut(master)
         self.frame_main = design.creer_frame_main(master)
         self.frame_bas = design.creer_frame_bas(master)
@@ -57,12 +59,28 @@ class main:
         self.bold_button, self.italic_button, self.sl_button = design.creer_boutons_toolbar(self.toolbar, self.toggle_bold, self.toggle_italic, self.toggle_sl)
         var.text_widget = design.creer_zone_texte(self.frame2)
 
+
+
         self.lab_version = design.creer_label_version(self.frame_bas)
 
-        self.menubar = design.create_menu(self.master, var.frame_haut)
+        self.menubar = design.create_menu()
         self.master.config(menu=self.menubar)
 
         design.configurer_tags_texte(var.text_widget)
+
+    def update_text_widget(self):
+        if hasattr(var, 'text_widget') and var.text_widget is not None:
+            var.text_widget.destroy()
+
+        var.text_widget = design.creer_zone_texte(self.frame2)
+        var.text_widget.pack(fill=tk.BOTH, expand=True)
+
+
+    def update_menu(self):
+        if self.menubar is not None:
+            self.menubar.destroy()
+        self.menubar = design.create_menu()
+        self.master.config(menu=self.menubar)
 
     def toggle_bold(self):
         current_font = tk.font.Font(font=var.text_widget["font"])

@@ -14,7 +14,7 @@ def creer_table_chapitre(chemin):
     # Création d'un objet curseur pour exécuter les commandes SQL
     cursor = conn.cursor()
 
-    # Vérification de l'existence de la table
+##### Table chapitre
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='chapitre'")
     table_existe = cursor.fetchone()
 
@@ -121,6 +121,7 @@ def creer_table_gene(chemin):
     conn = sqlite3.connect(chemin+'/dbgene')
     cursor = conn.cursor()
 
+
     # Création des tables si elles n'existent pas
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS perso (
@@ -135,6 +136,22 @@ def creer_table_gene(chemin):
             desc TEXT
         )
         ''')
+
+    cursor.execute('''
+            CREATE TABLE IF NOT EXISTS info (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                auteur TEXT,
+                date TEXT,
+                resume TEXT
+            )
+            ''')
+    cursor.execute('''
+                CREATE TABLE IF NOT EXISTS param (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    police TEXT,
+                    taille TEXT
+                )
+                ''')
 
     # Définition des champs attendus pour chaque table
     champs_attendus = {
@@ -151,6 +168,15 @@ def creer_table_gene(chemin):
         'lieux': {
             'nom': 'TEXT',
             'desc': 'TEXT'
+        },
+        'info': {
+            'auteur': 'TEXT',
+            'date': 'TEXT',
+            'resume': 'TEXT'
+        },
+        'param': {
+            'police': 'TEXT',
+            'taille': 'TEXT',
         }
     }
 
@@ -164,9 +190,16 @@ def creer_table_gene(chemin):
                 cursor.execute(f"ALTER TABLE {table} ADD COLUMN {champ} {type_champ}")
                 print(f"Champ '{champ}' ajouté à la table '{table}'.")
 
+
+
+    conn.commit()
+
+    cursor.execute("INSERT INTO info (auteur, date, resume) VALUES (?, ?, ?)", ("auteur", "date", "resume"))
+    cursor.execute("INSERT INTO param (police, taille) VALUES (?, ?)", ("Helvetica", "12"))
     conn.commit()
     conn.close()
-
+    var.param_police = "Helvetica"
+    var.param_taille = "12"
     print("Base de données 'dbgene' et tables mises à jour avec succès.")
 
 def tab_gene_del(id, table):
@@ -179,3 +212,43 @@ def tab_gene_del(id, table):
         conn.close()
     except Exception as e:
         fct_main.logs(e)
+def tab_info_update(auteur, date, resume):
+    try:
+        conn = sqlite3.connect(var.dossier_projet + '/dbgene')
+        cursor = conn.cursor()
+        cursor.execute("UPDATE info SET auteur = ?, date = ?, resume = ? WHERE id = ?", (auteur, date, resume, 1))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        fct_main.logs(e)
+def tab_param_update(police, taille):
+    try:
+        conn = sqlite3.connect(var.dossier_projet + '/dbgene')
+        cursor = conn.cursor()
+        cursor.execute("UPDATE param SET police = ?, taille = ? WHERE id = ?", (police, taille, 1))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        fct_main.logs(e)
+def tab_param_lire(varia):
+    try:
+        conn = sqlite3.connect(var.dossier_projet + "/dbgene")
+        cursor = conn.cursor()
+        requete = "SELECT " + varia + " FROM param WHERE id = 1"
+        cursor.execute(requete)
+        result = cursor.fetchone()
+        value = result[0]
+    except Exception as e:
+        fct_main.logs(e)
+    return value
+def tab_info_lire(varia):
+    try:
+        conn = sqlite3.connect(var.dossier_projet + "/dbgene")
+        cursor = conn.cursor()
+        requete = "SELECT " + varia + " FROM info WHERE id = 1"
+        cursor.execute(requete)
+        result = cursor.fetchone()
+        value = result[0]
+    except Exception as e:
+        fct_main.logs(e)
+    return value

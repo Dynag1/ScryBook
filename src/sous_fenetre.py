@@ -1,8 +1,9 @@
 import sqlite3
 import tkinter as tk
-from tkinter import ttk, FALSE, TRUE, messagebox
+from tkinter import ttk, FALSE, TRUE, messagebox, font
 import src.db as db
-from src import var
+from src import var, fct_main
+
 
 #################################################
 ##### Chapitre                              #####
@@ -11,27 +12,43 @@ from src import var
 ##### Créer le chapitre #####
 def fenetre_chapitre():
     sous_fenetre = tk.Toplevel()
-    sous_fenetre.title("Sous-fenêtre")
-    sous_fenetre.geometry("800x600")
-    # Création d'un cadre pour organiser les widgets
-    frame = ttk.Frame(sous_fenetre, padding="10")
-    frame.pack(fill=tk.BOTH, expand=True)
-    # Label "Nom"
-    # Label "Nom"
-    ttk.Label(frame, text="Numéro:").grid(row=0, column=0, sticky=tk.W, pady=5)
-    # Champ de saisie pour le nom
-    input_numero = ttk.Entry(frame)
-    input_numero.grid(row=0, column=1, sticky=tk.EW, pady=5)
-    ttk.Label(frame, text="Nom:").grid(row=0, column=2, sticky=tk.W, pady=5)
-    # Champ de saisie pour le nom
-    input_nom = ttk.Entry(frame)
-    input_nom.grid(row=0, column=3, sticky=tk.EW, pady=5)
+    sous_fenetre.title("Ajouter un chapitre")
+    sous_fenetre.geometry("600x500")
 
-    ttk.Label(frame, text="Résumé:").grid(row=1, column=0, columnspan=2, sticky=tk.W, pady=5)
-    text_widget = (tk.Text(frame, wrap="word", undo=True))
-    text_widget.grid(row=2, column=0, columnspan=2, pady=10)
+    # Création d'un cadre principal avec padding
+    main_frame = ttk.Frame(sous_fenetre, padding="20")
+    main_frame.pack(fill=tk.BOTH, expand=True)
+
+    # Frame pour les entrées numéro et nom
+    input_frame = ttk.Frame(main_frame)
+    input_frame.pack(fill=tk.X, pady=(0, 20))
+
+    # Numéro
+    ttk.Label(input_frame, text="Numéro:").grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
+    input_numero = ttk.Entry(input_frame, width=10)
+    input_numero.grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+
+    # Nom
+    ttk.Label(input_frame, text="Nom:").grid(row=0, column=2, sticky=tk.W, padx=(0, 10))
+    input_nom = ttk.Entry(input_frame)
+    input_nom.grid(row=0, column=3, sticky=tk.EW)
+
+    input_frame.columnconfigure(3, weight=1)
+
+    # Résumé
+    ttk.Label(main_frame, text="Résumé:").pack(anchor=tk.W, pady=(0, 5))
+    text_widget = tk.Text(main_frame, wrap="word", undo=True, height=15)
+    text_widget.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
+
     # Bouton de validation
-    ttk.Button(frame, text="Valider", command=lambda: valider_nom_chapitre(input_nom, text_widget, input_numero, sous_fenetre)).grid(row=3, column=0, columnspan=2, pady=10)
+    ttk.Button(main_frame, text="Valider",
+               command=lambda: valider_nom_chapitre(input_nom, text_widget, input_numero, sous_fenetre)
+              ).pack(pady=10)
+
+    # Configurer l'expansion
+    main_frame.columnconfigure(0, weight=1)
+    main_frame.rowconfigure(1, weight=1)
+
 ##### Enregistrer le chapitre #####
 def valider_nom_chapitre(nom, text_widget, numero, fenetre):
     nom = nom.get()
@@ -314,3 +331,50 @@ def fen_perso(id):
     canvas.bind("<Configure>", on_canvas_configure)
 
     sous_fenetre.mainloop()
+
+def ouvrir_fenetre_parametres():
+    fenetre_param = tk.Toplevel()
+    fenetre_param.title("Paramètres")
+    fenetre_param.geometry("300x200")
+
+    # Récupérer la liste des polices système
+    polices_systeme = list(font.families())
+    polices_systeme.sort()
+
+    # Récupérer les valeurs actuelles de la police et de la taille depuis la base de données
+    conn = sqlite3.connect(var.dossier_projet + "/dbgene")
+    cursor = conn.cursor()
+    cursor.execute("SELECT police, taille FROM param WHERE id = 1")
+    result = cursor.fetchone()
+    police_actuelle, taille_actuelle = result if result else ('', '12')
+    conn.close()
+
+    # Sélection de la police
+    tk.Label(fenetre_param, text="Police :").pack(pady=5)
+    var_police = tk.StringVar(value=police_actuelle)
+    combo_police = ttk.Combobox(fenetre_param, textvariable=var_police, values=polices_systeme)
+    combo_police.pack(pady=5)
+
+    # Sélection de la taille
+    tk.Label(fenetre_param, text="Taille :").pack(pady=5)
+    tailles = list(range(10, 21))
+    var_taille = tk.StringVar(value=taille_actuelle)
+    combo_taille = ttk.Combobox(fenetre_param, textvariable=var_taille, values=tailles)
+    combo_taille.pack(pady=5)
+
+    # Bouton Sauvegarder
+    def sauvegarder():
+        var.param_police = var_police.get()
+        var.param_taille = var_taille.get()
+        db.tab_param_update(var_police.get(), var_taille.get())
+
+        fenetre_param.destroy()
+
+    tk.Button(fenetre_param, text="Sauvegarder", command=sauvegarder).pack(pady=10)
+
+    # Modifier la taille de la police pour les listes déroulantes
+    style = ttk.Style()
+    style.configure("TCombobox", font=("TkDefaultFont", 12))
+    fenetre_param.option_add("*TCombobox*Listbox.font", ("TkDefaultFont", 12))
+
+    fenetre_param.mainloop()

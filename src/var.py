@@ -10,6 +10,8 @@ chapitre = ""
 path = ""
 nom = ""
 
+app_instance = ""
+
 
 lab_nom_projet = ""
 frame_haut = ""
@@ -17,3 +19,10 @@ txt_chapitre = ""
 dossier_projet = ""
 text_widget = ""
 list_chapitre = ""
+
+param_police = "Helvetica"
+param_taille = "12"
+
+info_auteur = ""
+info_date = ""
+info_resume = ""

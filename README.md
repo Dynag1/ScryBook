@@ -1,4 +1,4 @@
-# Scrybook
+# ScryBook
 SryBook est un logiciel d'aide à l'écriture. Il gère les chapitres, les personnages, les lieux.
 
 # Fonctionnalités 

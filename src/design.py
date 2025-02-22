@@ -63,8 +63,9 @@ def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl):
 
 
 def creer_zone_texte(parent):
+    print(var.param_police+" "+var.param_taille)
     text_widget = tk.Text(parent, wrap="word", undo=True)
-    text_widget.config(font=("Helvetica", 12), padx=20, pady=20, spacing1=4, spacing2=4, spacing3=4)
+    text_widget.config(font=(var.param_police, int(var.param_taille)), padx=20, pady=20, spacing1=4, spacing2=4, spacing3=4)
     text_widget.pack(expand=True, fill="both")
 
     # Configurer les tags pour l'espacement uniforme augmenté
@@ -86,8 +87,8 @@ def projet_open():
 def projet_save():
     return
 
-def create_menu(fenetre, frame_haut):
-    menubar = tk.Menu(fenetre)
+def create_menu():
+    menubar = tk.Menu()
     menu1 = tk.Menu(menubar, tearoff=0)
     menu1.add_command(label="Nouveau projet", command=projet_new)
     menu1.add_command(label="Ouvrir un Projet", command=projet_open)
@@ -95,14 +96,17 @@ def create_menu(fenetre, frame_haut):
     menubar.add_cascade(label="Fichier", menu=menu1)
 
     menu2 = tk.Menu(menubar, tearoff=0)
-    menu2.add_command(label="Général", command="paramGene")
-    menubar.add_cascade(label="Paramètres", menu=menu2)
+    menu2.add_command(label="Paramètres", command=lambda: sfenetre.ouvrir_fenetre_parametres())
+    menu2.add_command(label="Informations", command=lambda: sfenetre.ouvrir_fenetre_parametres)
+    if var.dossier_projet != "":
+        menubar.add_cascade(label="Paramètres", menu=menu2)
 
     menu3 = tk.Menu(menubar, tearoff=0)
     menu3.add_command(label="PDF", command=lambda : export_pdf.export())
     menu3.add_command(label="Docx", command=lambda: export_docx.export())
     menu3.add_command(label="Epub", command=lambda: export_epub.export())
-    menubar.add_cascade(label="Export", menu=menu3)
+    if var.dossier_projet != "":
+        menubar.add_cascade(label="Export", menu=menu3)
 
     menubar.bind_all('<Control-s>', rac_s)
 
