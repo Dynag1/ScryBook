@@ -34,11 +34,6 @@ def create_doc(input_files, output_file, title):
     doc.add_paragraph(title, style='Title')
     doc.add_page_break()
 
-    # Sommaire (espace réservé)
-    doc.add_paragraph("Table des matières", style='Title')
-    doc.add_paragraph("(La table des matières sera générée automatiquement)")
-    doc.add_page_break()
-
     # Contenu des chapitres
     for input_file, chapter_title in input_files:
         doc.add_paragraph(chapter_title, style='Heading 1')

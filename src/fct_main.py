@@ -134,12 +134,11 @@ def save_projet():
                     else:
                         formatted_line += char
                 content.append(formatted_line)
-            return "\n".join(content)
+            return "\n".join(content).rstrip('\n')  # Supprime le dernier \n
 
         with open(var.dossier_projet+"/"+var.chapitre, "w", encoding='utf-8') as f:
             content = get_formatted_content(var.text_widget)
             f.write(content)
-            #f.write(var.text_widget.get_formatted_content(1.0, tk.END))
     print("save")
 ##### Nouveau Chapitre #####
 def nouveau_chapitre():

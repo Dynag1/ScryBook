@@ -6,6 +6,9 @@ import src.sous_fenetre as sfenetre
 from tkinter import ttk
 import src.export_pdf as export_pdf
 import src.export_docx as export_docx
+import src.export_epub as export_epub
+
+
 #### Frame Haut ####
 def creer_frame_haut(master):
     frame_haut = tk.Frame(master=master, height=50, bg=var.bg_frame_haut, padx=5, pady=5)
@@ -58,11 +61,18 @@ def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl):
     sl_button.pack(side="left", padx=2, pady=2)
     return bold_button, italic_button, sl_button
 
+
 def creer_zone_texte(parent):
     text_widget = tk.Text(parent, wrap="word", undo=True)
-    text_widget.config(font=("Comic Sans MS", 12),  padx=20, pady=20, spacing1=0, spacing2=8, spacing3=0)
+    text_widget.config(font=("Helvetica", 12), padx=20, pady=20, spacing1=4, spacing2=4, spacing3=4)
     text_widget.pack(expand=True, fill="both")
+
+    # Configurer les tags pour l'espacement uniforme augmenté
+    text_widget.tag_configure("line_spacing", spacing1=8, spacing2=8, spacing3=8)
+    text_widget.tag_add("line_spacing", "1.0", "end")
+
     return text_widget
+
 
 def projet_new():
     fct_main.projet_new()
@@ -91,6 +101,7 @@ def create_menu(fenetre, frame_haut):
     menu3 = tk.Menu(menubar, tearoff=0)
     menu3.add_command(label="PDF", command=lambda : export_pdf.export())
     menu3.add_command(label="Docx", command=lambda: export_docx.export())
+    menu3.add_command(label="Epub", command=lambda: export_epub.export())
     menubar.add_cascade(label="Export", menu=menu3)
 
     menubar.bind_all('<Control-s>', rac_s)
