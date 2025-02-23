@@ -1,7 +1,7 @@
-# ScryBook
+## ScryBook
 SryBook est un logiciel d'aide à l'écriture. Il gère les chapitres, les personnages, les lieux.
 
-# Fonctionnalités 
+## Fonctionnalités 
 - [x] Gestion des chapitres
 - [x] Gestion des personnages
 - [ ] Gestion des lieux
@@ -9,6 +9,7 @@ SryBook est un logiciel d'aide à l'écriture. Il gère les chapitres, les perso
 - [x] Export en PDF
 - [ ] Export en docx
 - [ ] Export en Epub
-- [ ] Gestion des polices
-- [ ] Gestion de la taille des caractères
+- [x] Gestion des polices
+- [x] Gestion de la taille des caractères
+- [x] Recherche de mise à jour
 

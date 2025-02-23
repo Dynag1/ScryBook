@@ -1,7 +1,7 @@
 import os
 import threading
 import tkinter as tk
-from tkinter import messagebox, ttk, LEFT, TRUE, FALSE
+from tkinter import ttk
 from src import var, design, fct_main, sous_fenetre, thread_maj
 
 

@@ -2,16 +2,17 @@ import os
 import sqlite3
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Frame
 from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER
 from reportlab.lib.units import cm
 from reportlab.pdfgen import canvas
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import src.var as var
 import src.fct_main as fct_main
+
 
 class NumberedCanvas(canvas.Canvas):
     def __init__(self, *args, **kwargs):
@@ -31,9 +32,10 @@ class NumberedCanvas(canvas.Canvas):
         canvas.Canvas.save(self)
 
     def draw_page_number(self, page_num, total_pages):
-        if page_num > 2:  # Ne pas numéroter les deux premières pages
+        if page_num > 2 and page_num < total_pages:  # Ne pas numéroter les deux premières pages et la dernière page
             self.setFont("Helvetica", 9)
-            self.drawRightString(20*cm, 1*cm, f"{page_num - 2}")
+            self.drawRightString(20 * cm, 1 * cm, f"{page_num - 2}")
+
 
 class MyDocTemplate(SimpleDocTemplate):
     def __init__(self, *args, **kwargs):
@@ -41,11 +43,9 @@ class MyDocTemplate(SimpleDocTemplate):
         self.toc = TableOfContents()
         self.toc.levelStyles = [
             ParagraphStyle(name='TOCHeading1', fontSize=14, leading=16, firstLineIndent=0,
-                           leftIndent=0, rightIndent=0, spaceBefore=5, spaceAfter=5,
-                           endDots='.', dottedWidth=0.5*cm),
-            ParagraphStyle(name='TOCHeading2', fontSize=12, leading=14, firstLineIndent=0.5*cm,
-                           leftIndent=0.5*cm, rightIndent=0, spaceBefore=2, spaceAfter=2,
-                           endDots='.', dottedWidth=0.5*cm)
+                           leftIndent=0, rightIndent=0, spaceBefore=5, spaceAfter=5),
+            ParagraphStyle(name='TOCHeading2', fontSize=12, leading=14, firstLineIndent=0.5 * cm,
+                           leftIndent=0.5 * cm, rightIndent=0, spaceBefore=2, spaceAfter=2)
         ]
 
     def afterFlowable(self, flowable):
@@ -57,10 +57,11 @@ class MyDocTemplate(SimpleDocTemplate):
             elif style == 'Subtitle':
                 self.notify('TOCEntry', (1, text, self.page))
 
-def create_pdf(input_files, output_file, title):
+
+def create_pdf(input_files, output_file, title, subtitle, author, resume):
     doc = MyDocTemplate(output_file, pagesize=A4,
-                        leftMargin=2*cm, rightMargin=2*cm,
-                        topMargin=2*cm, bottomMargin=2*cm)
+                        leftMargin=2 * cm, rightMargin=2 * cm,
+                        topMargin=2 * cm, bottomMargin=2 * cm)
     elements = []
 
     styles = getSampleStyleSheet()
@@ -72,22 +73,48 @@ def create_pdf(input_files, output_file, title):
                                  fontSize=24,
                                  spaceAfter=30)
 
+    subtitle_style = ParagraphStyle(name='CenteredSubtitle', parent=styles['Normal'],
+                                    alignment=TA_CENTER,
+                                    fontSize=18,
+                                    spaceAfter=60)
+
+    author_style = ParagraphStyle(name='CenteredAuthor', parent=styles['Normal'],
+                                  alignment=TA_CENTER,
+                                  fontSize=14)
+
     chapter_title_style = ParagraphStyle(name='CenteredChapterTitle', parent=styles['Heading1'],
                                          alignment=TA_CENTER,
                                          fontSize=18,
                                          spaceAfter=12)
 
-    subtitle_style = ParagraphStyle(name='Subtitle', parent=styles['Heading2'],
-                                    fontSize=14,
-                                    spaceAfter=6)
+    subtitle_style_content = ParagraphStyle(name='Subtitle', parent=styles['Heading2'],
+                                            fontSize=14,
+                                            spaceAfter=6)
 
-    # Page de titre
-    elements.append(Paragraph(title, title_style))
+    resume_style = ParagraphStyle(name='Resume', parent=styles['Normal'],
+                                  fontSize=12,
+                                  spaceAfter=12)
+
+    def title_page(canvas, doc):
+        canvas.saveState()
+        # Titre
+        title_frame = Frame(doc.leftMargin, doc.height * 0.6, doc.width, doc.height * 0.2, showBoundary=0)
+        title_frame.addFromList([Paragraph(title, title_style)], canvas)
+        # Sous-titre
+        subtitle_frame = Frame(doc.leftMargin, doc.height * 0.5, doc.width, doc.height * 0.1, showBoundary=0)
+        subtitle_frame.addFromList([Paragraph(subtitle, subtitle_style)], canvas)
+        # Auteur
+        author_frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height * 0.1, showBoundary=0)
+        author_frame.addFromList([Paragraph(f"Par {author}", author_style)], canvas)
+        canvas.restoreState()
+
     elements.append(PageBreak())
 
     # Sommaire
+    toc = TableOfContents()
+    toc.levelStyles = doc.toc.levelStyles
     elements.append(Paragraph("Sommaire", title_style))
-    elements.append(doc.toc)
+    elements.append(toc)
     elements.append(PageBreak())
 
     # Contenu des chapitres
@@ -102,7 +129,7 @@ def create_pdf(input_files, output_file, title):
             if line.strip():
                 if line.startswith('##'):  # Sous-titre
                     subtitle = line.strip('#').strip()
-                    elements.append(Paragraph(subtitle, subtitle_style))
+                    elements.append(Paragraph(subtitle, subtitle_style_content))
                     elements.append(Spacer(1, 6))
                 elif line.startswith('#'):  # Titre de section (ignoré car déjà traité)
                     pass
@@ -113,8 +140,24 @@ def create_pdf(input_files, output_file, title):
 
         elements.append(PageBreak())
 
+    # Ajout du résumé en dernière page
+    elements.append(PageBreak())
+    elements.append(Paragraph("Résumé", title_style))
+    elements.append(Spacer(1, 12))
+    elements.append(Paragraph(resume, resume_style))
+
     # Génération du PDF avec le sommaire
-    doc.multiBuild(elements, canvasmaker=NumberedCanvas)
+    try:
+        doc.multiBuild(elements, onFirstPage=title_page, canvasmaker=NumberedCanvas)
+        return True
+    except PermissionError:
+        messagebox.showerror("Erreur",
+                             "Impossible d'enregistrer le fichier PDF. Vérifiez que vous avez les permissions nécessaires et que le fichier n'est pas ouvert dans un autre programme.")
+        return False
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Une erreur s'est produite lors de la création du PDF : {str(e)}")
+        return False
+
 
 def get_file_paths_and_titles_from_database():
     conn = sqlite3.connect(var.dossier_projet + '/dbchapitre')
@@ -124,12 +167,13 @@ def get_file_paths_and_titles_from_database():
     conn.close()
     return [(os.path.join(var.dossier_projet, str(result[0])), result[1]) for result in results]
 
+
 def select_files_and_create_pdf():
     # Obtenir les chemins des fichiers et les titres depuis la base de données
     input_files = get_file_paths_and_titles_from_database()
 
     if not input_files:
-        print("Aucun fichier trouvé dans la base de données.")
+        messagebox.showwarning("Attention", "Aucun fichier trouvé dans la base de données.")
         return
 
     # Sélectionner l'emplacement et le nom du fichier PDF de sortie
@@ -140,9 +184,23 @@ def select_files_and_create_pdf():
     # Utiliser var.nom comme titre
     title = var.nom
 
+    # Récupérer le sous-titre, l'auteur et le résumé depuis la base de données
+    conn = sqlite3.connect(var.dossier_projet + '/dbgene')
+    cur = conn.cursor()
+    cur.execute("SELECT stitre, auteur, resume FROM info WHERE id=1")
+    result = cur.fetchone()
+    conn.close()
+
+    subtitle = result[0] if result else "Sous-titre par défaut"
+    author = result[1] if result else "Auteur inconnu"
+    resume = result[2] if result and len(result) > 2 else "Résumé non disponible"
+
     # Créer le PDF
-    create_pdf(input_files, output_file, title)
-    fct_main.alert(f"Le fichier PDF a été créé : {output_file}")
+    if create_pdf(input_files, output_file, title, subtitle, author, resume):
+        messagebox.showinfo("Succès", f"Le fichier PDF a été créé : {output_file}")
+    else:
+        messagebox.showerror("Erreur", "La création du fichier PDF a échoué.")
+
 
 def export():
     # Créer une fenêtre Tkinter (elle sera cachée)
