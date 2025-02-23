@@ -81,21 +81,23 @@ def open_projet():
                 var.path = valeur
             elif cle == 'nom':
                 var.nom = valeur
-        var.dossier_projet = var.path+"/"+var.nom
-        db.creer_table_gene(var.dossier_projet)
-        db.creer_table_chapitre(var.dossier_projet)
-        update_label_nom(var.nom)
-        design.creer_bouton_haut()
-        db.liste_chapitre()
-        design.create_menu()
-        var.param_police = db.tab_param_lire("police")
-        var.param_taille = db.tab_param_lire("taille")
-        var.info_auteur = db.tab_info_lire("auteur")
-        var.info_date = db.tab_info_lire("date")
-        var.info_resume = db.tab_info_lire("resume")
-        print(var.app_instance)
-        var.app_instance.update_text_widget()
-        var.app_instance.update_menu()
+
+        def fct():
+            var.dossier_projet = var.path+"/"+var.nom
+            db.creer_table_gene(var.dossier_projet)
+            db.creer_table_chapitre(var.dossier_projet)
+            var.app_instance.update_titre()
+            design.creer_bouton_haut()
+            db.liste_chapitre()
+            design.create_menu()
+            var.param_police = db.tab_param_lire("police")
+            var.param_taille = db.tab_param_lire("taille")
+            var.info_auteur = db.tab_info_lire("auteur")
+            var.info_date = db.tab_info_lire("date")
+            var.info_resume = db.tab_info_lire("resume")
+            var.app_instance.update_text_widget()
+            var.app_instance.update_menu()
+        fct()
         thread = threading.Thread(target=enregistrement_auto)
         thread.start()
 ##### Update le Nom du projet #####
@@ -115,7 +117,6 @@ def enregistrement_auto(tk=None):
 #####################################################
 ##### Sauvegarder le chapitre #####
 def save_projet():
-    print(var.chapitre)
     if var.chapitre != "":
         def get_formatted_content(self):
             content = []
@@ -149,7 +150,6 @@ def save_projet():
         with open(var.dossier_projet+"/"+var.chapitre, "w", encoding='utf-8') as f:
             content = get_formatted_content(var.text_widget)
             f.write(content)
-    print("save")
 ##### Nouveau Chapitre #####
 def nouveau_chapitre():
     s_fenetre.fenetre_chapitre()

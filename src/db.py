@@ -1,5 +1,4 @@
 import sqlite3
-from logging import exception
 import src.fct_main as fct_main
 import src.var as var
 import tkinter as tk
@@ -60,12 +59,10 @@ def update_chapitre(nom, resume, numero, id):
     liste_chapitre()
 ##### Lister les chapitres #####
 def liste_chapitre():
-    print(var.dossier_projet)
     # Connexion à la base de données
     global cursor
     try:
         conn = sqlite3.connect(var.dossier_projet+"/dbchapitre")
-        print(var.dossier_projet+"/dbchapitre")
         cursor = conn.cursor()
     except Exception as e:
         fct_main.logs(e)
@@ -89,7 +86,6 @@ def effacer(id, type):
     if type == "chapitre":
         try:
             conn = sqlite3.connect(var.dossier_projet + "/dbchapitre")
-            print(var.dossier_projet + "/dbchapitre")
             cursor = conn.cursor()
         except Exception as e:
             fct_main.logs(e)
@@ -112,7 +108,6 @@ def lire(type, id, varia, curseur=None):
         resultat = cursor.fetchone()
         if resultat:
             texte = str(resultat[0])
-        print(resultat)
 
     return texte
 
@@ -140,6 +135,8 @@ def creer_table_gene(chemin):
     cursor.execute('''
             CREATE TABLE IF NOT EXISTS info (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                titre TEXT,
+                stitre TEXT,
                 auteur TEXT,
                 date TEXT,
                 resume TEXT
@@ -170,6 +167,8 @@ def creer_table_gene(chemin):
             'desc': 'TEXT'
         },
         'info': {
+            'titre': 'TEXT',
+            'stitre': 'TEXT',
             'auteur': 'TEXT',
             'date': 'TEXT',
             'resume': 'TEXT'

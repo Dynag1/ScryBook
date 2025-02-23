@@ -1,11 +1,8 @@
 import os
+import threading
 import tkinter as tk
-import src.var as var
 from tkinter import messagebox, ttk, LEFT, TRUE, FALSE
-import src.fct_main as fct_main
-import src.design as design
-import src.sous_fenetre as sfenetre
-
+from src import var, design, fct_main, sous_fenetre, thread_maj
 
 
 global app_instance
@@ -22,15 +19,16 @@ class main:
         master.title(var.nom)
         master.geometry("800x600")
         master.iconbitmap('src/logoSb.ico')
-        master.state('zoomed')
-        print(app_instance)
+        #master.state('zoomed')
+        thread = threading.Thread(target=thread_maj.main())
+        thread.start()
         fct_main.creer_dossier("Projets")
         var.frame_haut = design.creer_frame_haut(master)
         self.frame_main = design.creer_frame_main(master)
         self.frame_bas = design.creer_frame_bas(master)
         self.frame1, self.frame2 = design.creer_sous_frames(self.frame_main)
-        var.lab_nom_projet = tk.Label(master=self.frame1, bg=var.bg_frame_haut, text=var.nom)
-        var.lab_nom_projet.grid(row=0, column=0, padx=5, pady=5)
+        self.lab_nom_projet = tk.Label(master=self.frame1, bg=var.bg_frame_haut, text=var.nom)
+        self.lab_nom_projet.grid(row=0, column=0, padx=5, pady=5)
 
         design.creer_bouton_haut()
         self.but_chapitre = ttk.Button(self.frame1, text="Nouveau chapitre", command=fct_main.nouveau_chapitre).grid(row=1, column=0, padx=5, pady=5)
@@ -81,6 +79,12 @@ class main:
             self.menubar.destroy()
         self.menubar = design.create_menu()
         self.master.config(menu=self.menubar)
+
+    def update_titre(self):
+        if self.lab_nom_projet is not None:
+            self.lab_nom_projet.destroy()
+        self.lab_nom_projet = tk.Label(master=self.frame1, bg=var.bg_frame_haut, text=var.nom)
+        self.lab_nom_projet.grid(row=0, column=0, padx=5, pady=5)
 
     def toggle_bold(self):
         current_font = tk.font.Font(font=var.text_widget["font"])
@@ -153,7 +157,7 @@ class main:
         else:
             pass
     def resume(self):
-        sfenetre.fenetre_chapitre_resume(var.chapitre)
+        sous_fenetre.fenetre_chapitre_resume(var.chapitre)
     def delete(self):
         print("effacer"+var.chapitre)
         id = var.chapitre

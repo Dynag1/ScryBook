@@ -1,6 +1,6 @@
 import tkinter as tk
 import src.var as var
-from tkinter import font
+from tkinter import font, messagebox
 import src.fct_main as fct_main
 import src.sous_fenetre as sfenetre
 from tkinter import ttk
@@ -8,7 +8,14 @@ import src.export_pdf as export_pdf
 import src.export_docx as export_docx
 import src.export_epub as export_epub
 
-
+def question_box(title, message):
+    var = messagebox.askquestion(title, message)
+    resp = False
+    if var == "yes":
+        resp = True
+    else:
+        resp = False
+    return resp
 #### Frame Haut ####
 def creer_frame_haut(master):
     frame_haut = tk.Frame(master=master, height=50, bg=var.bg_frame_haut, padx=5, pady=5)
@@ -96,8 +103,8 @@ def create_menu():
     menubar.add_cascade(label="Fichier", menu=menu1)
 
     menu2 = tk.Menu(menubar, tearoff=0)
-    menu2.add_command(label="Paramètres", command=lambda: sfenetre.ouvrir_fenetre_parametres())
-    menu2.add_command(label="Informations", command=lambda: sfenetre.ouvrir_fenetre_parametres)
+    menu2.add_command(label="Police", command=lambda: sfenetre.ouvrir_fenetre_parametres_edition())
+    menu2.add_command(label="Informations", command=lambda: sfenetre.ouvrir_fenetre_parametres_information())
     if var.dossier_projet != "":
         menubar.add_cascade(label="Paramètres", menu=menu2)
 

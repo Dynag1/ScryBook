@@ -1,8 +1,8 @@
 import sqlite3
 import tkinter as tk
-from tkinter import ttk, FALSE, TRUE, messagebox, font
+from tkinter import ttk, messagebox, font
 import src.db as db
-from src import var, fct_main
+from src import var
 
 
 #################################################
@@ -218,7 +218,7 @@ def fenetre_perso():
 
     sous_fenetre.mainloop()
 
-##### Fenetre détail persos
+##### Fenetre détail perso
 def fen_perso(id):
     sous_fenetre = tk.Toplevel()
     sous_fenetre.title("Détails du Personnage")
@@ -331,8 +331,11 @@ def fen_perso(id):
     canvas.bind("<Configure>", on_canvas_configure)
 
     sous_fenetre.mainloop()
-
-def ouvrir_fenetre_parametres():
+#################################################
+##### Parametres                            #####
+#################################################
+##### Parametres Police
+def ouvrir_fenetre_parametres_edition():
     fenetre_param = tk.Toplevel()
     fenetre_param.title("Paramètres")
     fenetre_param.geometry("300x200")
@@ -378,3 +381,112 @@ def ouvrir_fenetre_parametres():
     fenetre_param.option_add("*TCombobox*Listbox.font", ("TkDefaultFont", 12))
 
     fenetre_param.mainloop()
+##### Fenetre informations
+def ouvrir_fenetre_parametres_information():
+    sous_fenetre = tk.Toplevel()
+    sous_fenetre.title("Informations")
+    sous_fenetre.geometry("500x400")
+
+    style = ttk.Style()
+    style.configure("Custom.TFrame", background=var.bg_frame_mid)
+
+    main_frame = ttk.Frame(sous_fenetre, style="Custom.TFrame", padding=10)
+    main_frame.pack(fill=tk.BOTH, expand=True)
+
+    canvas = tk.Canvas(main_frame, bg=var.bg_frame_mid, highlightthickness=0)
+    scrollable_frame = ttk.Frame(canvas, style="Custom.TFrame")
+
+    scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    def on_mousewheel(event):
+        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+    canvas.bind_all("<MouseWheel>", on_mousewheel)
+
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+
+    def creer_champ(label_text, row, widget_type=ttk.Entry):
+        label = ttk.Label(scrollable_frame, text=label_text, background=var.bg_frame_mid)
+        label.grid(row=row, column=0, sticky="w", pady=5, padx=5)
+        widget = widget_type(scrollable_frame)
+        widget.grid(row=row, column=1, sticky="ew", pady=5, padx=5)
+        scrollable_frame.grid_columnconfigure(1, weight=1)
+        return widget
+
+    titre = creer_champ("Titre:", 0)
+    sous_titre = creer_champ("Sous Titre:", 1)
+    auteur = creer_champ("Auteur:", 2)
+    date = creer_champ("Date:", 3)
+    resume = creer_champ("Résumé:", 4, widget_type=lambda parent: tk.Text(parent, height=4, wrap=tk.WORD))
+
+    canvas.pack(side="left", fill="both", expand=True)
+
+    # Le reste du code reste inchangé
+
+
+    def sauvegarder():
+        titre_val = titre.get()
+        sous_titre_val = sous_titre.get()
+        auteur_val = auteur.get()
+        date_val = date.get()
+        resume_val = resume.get("1.0", tk.END).strip()
+
+
+        conn = sqlite3.connect(var.dossier_projet + '/dbgene')
+        cursor = conn.cursor()
+
+
+        cursor.execute('''
+        UPDATE info
+        SET titre=?, stitre=?, auteur=?, date=?, resume=?
+        WHERE id=?
+        ''', (titre_val, sous_titre_val, auteur_val, date_val, resume_val, 1))
+
+        conn.commit()
+        conn.close()
+        sous_fenetre.destroy()
+
+    button_frame = ttk.Frame(sous_fenetre, style="Custom.TFrame")
+    button_frame.pack(side="bottom", fill="x", padx=10, pady=10)
+
+    save_button = ttk.Button(button_frame, text="Sauvegarder", command=sauvegarder)
+    save_button.pack(expand=True)
+
+    def get_perso_data():
+        conn = sqlite3.connect(var.dossier_projet + '/dbgene')
+        cursor = conn.cursor()
+
+        query = "SELECT titre, stitre, auteur, date, resume FROM info WHERE id=1"
+        cursor.execute(query)
+        data = cursor.fetchone()
+
+        conn.close()
+        return data
+    data = get_perso_data()
+    if data:
+        titre.insert(0, data[0])
+        sous_titre.insert(0, data[1])
+        auteur.insert(0, data[2])
+        date.insert(0, data[3])
+        resume.insert("1.0", data[4])
+
+    else:
+        print("Aucune donnée trouvée dans la table perso")
+
+    def on_frame_configure(event):
+        canvas.configure(scrollregion=canvas.bbox("all"))
+
+    scrollable_frame.bind("<Configure>", on_frame_configure)
+
+    def on_canvas_configure(event):
+        canvas.itemconfig(canvas.create_window((0, 0), window=scrollable_frame, anchor="nw"), width=event.width)
+
+    canvas.bind("<Configure>", on_canvas_configure)
+
+    sous_fenetre.mainloop()
