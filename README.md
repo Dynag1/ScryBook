@@ -5,10 +5,10 @@ SryBook est un logiciel d'aide à l'écriture. Il gère les chapitres, les perso
 - [x] Gestion des chapitres
 - [x] Gestion des personnages
 - [ ] Gestion des lieux
-- [ ] Gestion des informations du livre
+- [x] Gestion des informations du livre
 - [x] Export en PDF
 - [ ] Export en docx
-- [ ] Export en Epub
+- [x] Export en Epub
 - [x] Gestion des polices
 - [x] Gestion de la taille des caractères
 - [x] Recherche de mise à jour

@@ -1,72 +1,135 @@
-import os
-import sqlite3
+import ebooklib
 from ebooklib import epub
-import src.var as var
-import src.fct_main as fct_main
+import sqlite3
+import os
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
+import src.var as var
 
 
-def get_chapters_from_database():
-    conn = sqlite3.connect(os.path.join(var.dossier_projet, 'dbchapitre'))
-    cur = conn.cursor()
-    cur.execute("SELECT id, nom, numero FROM chapitre ORDER BY numero")
-    chapters = cur.fetchall()
-    conn.close()
-    return chapters
-
-
-def text_files_to_epub(output_file, title, author):
+def create_epub(input_files, output_file, title, subtitle, author, resume):
     book = epub.EpubBook()
+
+    # Métadonnées
     book.set_identifier('id123456')
     book.set_title(title)
     book.set_language('fr')
     book.add_author(author)
 
-    chapters = []
-    db_chapters = get_chapters_from_database()
+    # Styles CSS
+    style = '''
+    @namespace epub "http://www.idpf.org/2007/ops";
 
-    for chapter_id, chapter_title, chapter_number in db_chapters:
-        file_path = os.path.join(var.dossier_projet, str(chapter_id))
+    body {
+        font-family: Arial, sans-serif;
+    }
 
-        if not os.path.exists(file_path):
-            print(f"Attention : Le fichier pour le chapitre {chapter_title} n'existe pas.")
-            continue
+    h1 {
+        margin-top: 0;
+        page-break-before: always;
+    }
 
-        with open(file_path, 'r', encoding='utf-8') as file:
-            content = file.read().strip()
+    p {
+        margin-bottom: 0;
+        page-break-inside: avoid;
+    }
+    '''
 
-        chapter = epub.EpubHtml(title=chapter_title, file_name=f'chap_{chapter_number}.xhtml')
-        chapter.content = f'<h1>{chapter_title}</h1>'
-        chapter.content += ''.join(f'<p>{p.strip()}</p>' for p in content.split('\n\n\n') if p.strip())
+    nav_css = epub.EpubItem(uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style)
+    book.add_item(nav_css)
 
+    # Page de titre
+    title_page = epub.EpubHtml(title='Page de titre', file_name='title.xhtml')
+    title_page.content = f'<h1>{title}</h1><h2>{subtitle}</h2><p>Par {author}</p>'
+    title_page.add_item(nav_css)
+    book.add_item(title_page)
+
+    # Sommaire
+    toc = []
+
+    # Contenu des chapitres
+    for input_file, chapter_title in input_files:
+        chapter = epub.EpubHtml(title=chapter_title, file_name=f'chap_{os.path.basename(input_file)}.xhtml')
+        with open(input_file, 'r', encoding='utf-8') as file:
+            content = file.read()
+
+        # Nettoyage du contenu
+        content = content.replace('</p>\n\n', '</p>\n')  # Supprime les lignes vides excessives entre les paragraphes
+
+        chapter.set_content(f'<h1>{chapter_title}</h1>{content}')
+        chapter.add_item(nav_css)
         book.add_item(chapter)
-        chapters.append(chapter)
+        toc.append(chapter)
 
-    book.toc = [(epub.Section('Chapitres'), chapters)]
-    book.spine = ['nav'] + chapters
+    # Résumé
+    resume_page = epub.EpubHtml(title='Résumé', file_name='resume.xhtml')
+    resume_page.content = f'<h1>Résumé</h1><p>{resume}</p>'
+    resume_page.add_item(nav_css)
+    book.add_item(resume_page)
+
+    # Ajout du sommaire et de la navigation
+    book.toc = toc
     book.add_item(epub.EpubNcx())
     book.add_item(epub.EpubNav())
 
-    css_content = 'body { margin: 5%; }'
-    nav_css = epub.EpubItem(uid="style_nav", file_name="style/nav.css", media_type="text/css", content=css_content)
-    book.add_item(nav_css)
+    # Définir l'ordre des pages
+    book.spine = ['nav', title_page] + toc + [resume_page]
 
+    # Écrire le fichier EPUB
     epub.write_epub(output_file, book, {})
 
 
-def export():
+def get_file_paths_and_titles_from_database():
+    conn = sqlite3.connect(var.dossier_projet + '/dbchapitre')
+    cur = conn.cursor()
+    cur.execute("SELECT id, nom FROM chapitre ORDER BY numero")
+    results = cur.fetchall()
+    conn.close()
+    return [(os.path.join(var.dossier_projet, str(result[0])), result[1]) for result in results]
+
+
+def select_files_and_create_epub():
+    input_files = get_file_paths_and_titles_from_database()
+    if not input_files:
+        messagebox.showwarning("Attention", "Aucun fichier trouvé dans la base de données.")
+        return
+
+    # Créer une fenêtre Tkinter cachée
     root = tk.Tk()
     root.withdraw()
 
-    output_file = filedialog.asksaveasfilename(defaultextension=".epub", filetypes=[("Fichiers EPUB", "*.epub")])
+    # Demander à l'utilisateur où enregistrer le fichier EPUB
+    output_file = filedialog.asksaveasfilename(
+        defaultextension=".epub",
+        filetypes=[("EPUB files", "*.epub")],
+        title="Enregistrer le fichier EPUB"
+    )
+
     if not output_file:
+        messagebox.showinfo("Information", "Opération annulée.")
         return
 
     title = var.nom
-    author = "Auteur"  # Modifiez selon vos besoins
 
-    text_files_to_epub(output_file, title, author)
-    fct_main.alert(f"Le fichier EPUB a été créé : {output_file}")
+    conn = sqlite3.connect(var.dossier_projet + '/dbgene')
+    cur = conn.cursor()
+    cur.execute("SELECT stitre, auteur, resume FROM info WHERE id=1")
+    result = cur.fetchone()
+    conn.close()
 
-# export_epub()  # Décommentez pour exécuter l'export automatiquement
+    subtitle = result[0] if result else "Sous-titre par défaut"
+    author = result[1] if result else "Auteur inconnu"
+    resume = result[2] if result and len(result) > 2 else "Résumé non disponible"
+
+    try:
+        create_epub(input_files, output_file, title, subtitle, author, resume)
+        messagebox.showinfo("Succès", f"Le fichier EPUB a été créé : {output_file}")
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Une erreur s'est produite lors de la création du fichier EPUB : {str(e)}")
+
+
+def export():
+    select_files_and_create_epub()
+
+# Appel de la fonction d'export
+# export()
