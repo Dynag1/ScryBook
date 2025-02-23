@@ -19,6 +19,7 @@ class main:
         master.title(var.nom)
         master.geometry("800x600")
         master.iconbitmap('src/logoSb.ico')
+        master.title("ScryBook")
         #master.state('zoomed')
         thread = threading.Thread(target=thread_maj.main())
         thread.start()

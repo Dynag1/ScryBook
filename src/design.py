@@ -49,7 +49,7 @@ def creer_bouton_haut():
     if var.nom != "":
         ttk.Button(frame_boutons, text="Résumé", command=lambda: sfenetre.fenetre_chapitre_resume(var.chapitre), width=10).pack(side="left", padx=2, pady=2)
         ttk.Button(frame_boutons, text="Personnages", command=sfenetre.fenetre_perso, width=10).pack(side="left", padx=2, pady=2)
-        ttk.Button(frame_boutons, text="Lieux", command=var.frame_haut, width=10).pack(side="left", padx=2, pady=2)
+        ttk.Button(frame_boutons, text="Lieux", command=sfenetre.fen_lieux_liste, width=10).pack(side="left", padx=2, pady=2)
     else:
         ttk.Button(frame_boutons, text="Nouveau projet", command=fct_main.projet_new, width=15).pack(side="left", padx=2, pady=2)
         ttk.Button(frame_boutons, text="Ouvrir projet", command=fct_main.open_projet, width=15).pack(side="left", padx=2, pady=2)
