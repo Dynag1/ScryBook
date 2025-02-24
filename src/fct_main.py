@@ -100,9 +100,6 @@ def open_projet():
         fct()
         thread = threading.Thread(target=enregistrement_auto)
         thread.start()
-##### Update le Nom du projet #####
-def update_label_nom(new_text):
-    var.lab_nom_projet.config(text=new_text)
 ##### Enregistrement auto #####
 def enregistrement_auto(tk=None):
     tourne = True
@@ -111,7 +108,8 @@ def enregistrement_auto(tk=None):
             tourne = False
             Thread.curentThread.join()
         save_projet()
-        time.sleep(30)
+        print("save")
+        time.sleep(var.save_time)
 #####################################################
 ##### Chapitre                                  #####
 #####################################################

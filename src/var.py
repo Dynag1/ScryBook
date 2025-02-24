@@ -5,6 +5,7 @@ bg_frame_haut = "#81BEF7"
 bg_frame_mid = "#A9D0F5"
 bg_frame_droit = "#A9D0F5"
 bg_but = "#81BEF7"
+save_time = 30
 
 projet_en_cours = ""
 chapitre = ""

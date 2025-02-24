@@ -62,8 +62,6 @@ def fenetre_chapitre():
         fenetre.destroy()
 
     sous_fenetre.mainloop()
-
-
 ##### Afficher le chapitre #####
 def fenetre_chapitre_resume(id):
     bg_color = var.bg_frame_mid
@@ -126,8 +124,60 @@ def fenetre_chapitre_resume(id):
         fenetre.destroy()
 
     sous_fenetre.mainloop()
+def fenetre_chapitre_tout():
 
+    bg_color = var.bg_frame_mid
 
+    fenetre = tk.Toplevel()
+    fenetre.title("Liste des chapitres")
+    fenetre.geometry("800x600")
+    fenetre.configure(bg=bg_color)
+
+    style = ttk.Style()
+    style.configure("Custom.TFrame", background=bg_color)
+    style.configure("TLabel", background=bg_color)
+    style.configure("TButton", background=bg_color)
+
+    frame = ttk.Frame(fenetre, padding="10", style="Custom.TFrame")
+    frame.pack(fill=tk.BOTH, expand=True)
+
+    # Création d'un canvas avec scrollbar
+    canvas = tk.Canvas(frame, bg=bg_color)
+    scrollbar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
+    scrollable_frame = ttk.Frame(canvas, style="Custom.TFrame")
+
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    # Récupération des données de la base de données
+    conn = sqlite3.connect(var.dossier_projet + '/dbchapitre')
+    cursor = conn.cursor()
+    cursor.execute("SELECT numero, nom, resume FROM chapitre ORDER BY numero")
+    chapitres = cursor.fetchall()
+    conn.close()
+
+    # Affichage des chapitres
+    for i, (numero, nom, resume) in enumerate(chapitres):
+        ttk.Label(scrollable_frame, text=f"Chapitre {numero}", font=("TkDefaultFont", 12, "bold")).grid(row=i * 3,
+                                                                                                        column=0,
+                                                                                                        sticky="w",
+                                                                                                        pady=(
+                                                                                                        10, 0))
+        ttk.Label(scrollable_frame, text=f"Nom: {nom}").grid(row=i * 3 + 1, column=0, sticky="w")
+        text_widget = tk.Text(scrollable_frame, wrap="word", height=4, width=80)
+        text_widget.insert(tk.END, resume)
+        text_widget.config(state="disabled")
+        text_widget.grid(row=i * 3 + 2, column=0, sticky="w", pady=(0, 10))
+
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    fenetre.mainloop()
 #################################################
 ##### Persos                                #####
 #################################################
@@ -485,7 +535,7 @@ def fen_lieux_liste():
 
     sous_fenetre.mainloop()
 
-##### Fenetre détail perso
+##### Fenetre détail Lieux
 def fen_lieux(id):
     bg_color = var.bg_frame_mid
 

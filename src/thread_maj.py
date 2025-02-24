@@ -9,12 +9,9 @@ from src import var, design
 def getxml():
     try:
         url = var.site + "/ScryBook/changelog.xml"
-        print(f"Fetching XML from: {url}")
         http = urllib3.PoolManager(cert_reqs='CERT_NONE')
         response = http.request('GET', url)
-
         data = xmltodict.parse(response.data)
-        print("XML data parsed successfully")
         return data
 
     except Exception as e:
@@ -50,8 +47,6 @@ def testVersion():
         return
 
     current_version = ''.join(var.version.split('.'))
-    print(f"Current version: {var.version} ({current_version})")
-    print(f"Latest version: {version}")
 
     if int(current_version) < int(version):
         val = design.question_box('Mise à jour',

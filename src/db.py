@@ -76,7 +76,7 @@ def liste_chapitre():
     for item in var.list_chapitre.get_children():
         var.list_chapitre.delete(item)
     for ligne in donnees:
-        valeurs_reordonnees = (ligne[0], ligne[3], ligne[1])
+        valeurs_reordonnees = (ligne[0], ligne[2], ligne[1])
         var.list_chapitre.insert("", tk.END, values=valeurs_reordonnees)
 
     # Fermeture de la connexion

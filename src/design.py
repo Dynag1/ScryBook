@@ -47,7 +47,7 @@ def creer_bouton_haut():
     frame_boutons = tk.Frame(var.frame_haut, bg=var.bg_frame_haut)
     frame_boutons.pack(expand=True)
     if var.nom != "":
-        ttk.Button(frame_boutons, text="Résumé", command=lambda: sfenetre.fenetre_chapitre_resume(var.chapitre), width=10).pack(side="left", padx=2, pady=2)
+        ttk.Button(frame_boutons, text="Résumé", command=lambda: sfenetre.fenetre_chapitre_tout(), width=10).pack(side="left", padx=2, pady=2)
         ttk.Button(frame_boutons, text="Personnages", command=sfenetre.fenetre_perso, width=10).pack(side="left", padx=2, pady=2)
         ttk.Button(frame_boutons, text="Lieux", command=sfenetre.fen_lieux_liste, width=10).pack(side="left", padx=2, pady=2)
     else:

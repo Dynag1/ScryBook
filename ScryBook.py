@@ -2,6 +2,7 @@ import os
 import threading
 import tkinter as tk
 from tkinter import ttk
+import tkinter.font as tkFont
 from src import var, design, fct_main, sous_fenetre, thread_maj
 
 
@@ -28,11 +29,15 @@ class main:
         self.frame_main = design.creer_frame_main(master)
         self.frame_bas = design.creer_frame_bas(master)
         self.frame1, self.frame2 = design.creer_sous_frames(self.frame_main)
-        self.lab_nom_projet = tk.Label(master=self.frame1, bg=var.bg_frame_haut, text=var.nom)
-        self.lab_nom_projet.grid(row=0, column=0, padx=5, pady=5)
+
+        self.lab_nom_projet = tk.Label(master=self.frame1, bg=var.bg_frame_haut, text=var.nom, height=2, anchor='w')
+        #self.lab_nom_projet.grid(row=0, column=0, padx=5, pady=5, sticky='ew')
+
+        # Assurez-vous que la colonne s'étende
+        self.frame1.columnconfigure(0, weight=1)
 
         design.creer_bouton_haut()
-        self.but_chapitre = ttk.Button(self.frame1, text="Nouveau chapitre", command=fct_main.nouveau_chapitre).grid(row=1, column=0, padx=5, pady=5)
+        self.but_chapitre = ttk.Button(self.frame1, text="Nouveau chapitre", command=fct_main.nouveau_chapitre).grid(row=2, column=0, padx=5, pady=5)
 
         var.list_chapitre = ttk.Treeview(self.frame1, height=10, columns=("ID", "Numero", "Nom"), show="headings")
 
@@ -52,7 +57,7 @@ class main:
         var.list_chapitre.bind('<Double-1>', lambda e: self.resume())
 
         # Positionnement du Treeview
-        var.list_chapitre.grid(row=2, column=0, padx=5, pady=5)
+        var.list_chapitre.grid(row=1, column=0, padx=5, pady=5)
 
         self.toolbar = design.creer_toolbar(self.frame2)
         self.bold_button, self.italic_button, self.sl_button = design.creer_boutons_toolbar(self.toolbar, self.toggle_bold, self.toggle_italic, self.toggle_sl)
@@ -74,7 +79,6 @@ class main:
         var.text_widget = design.creer_zone_texte(self.frame2)
         var.text_widget.pack(fill=tk.BOTH, expand=True)
 
-
     def update_menu(self):
         if self.menubar is not None:
             self.menubar.destroy()
@@ -84,8 +88,26 @@ class main:
     def update_titre(self):
         if self.lab_nom_projet is not None:
             self.lab_nom_projet.destroy()
-        self.lab_nom_projet = tk.Label(master=self.frame1, bg=var.bg_frame_haut, text=var.nom)
-        self.lab_nom_projet.grid(row=0, column=0, padx=5, pady=5)
+        # Créez une police en gras
+        bold_font = tkFont.Font(weight="bold")
+
+        # Définissez une largeur fixe pour le label (en pixels)
+        label_width = 150  # Ajustez cette valeur selon vos besoins
+
+        self.lab_nom_projet = tk.Label(
+            master=self.frame1,
+            bg=var.bg_frame_haut,
+            text=var.nom,
+            #height="auto",
+            anchor='center',
+            font=bold_font,
+            wraplength=label_width,  # Permet le retour à la ligne automatique
+            justify='center'  # Centre le texte sur plusieurs lignes
+        )
+        self.lab_nom_projet.grid(row=0, column=0, padx=5, pady=5, sticky='ew')
+
+        # Assurez-vous que la colonne s'étende
+        self.frame1.columnconfigure(0, weight=1)
 
     def toggle_bold(self):
         current_font = tk.font.Font(font=var.text_widget["font"])
