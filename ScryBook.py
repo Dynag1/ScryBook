@@ -31,7 +31,6 @@ class main:
         self.frame1, self.frame2 = design.creer_sous_frames(self.frame_main)
 
         self.lab_nom_projet = tk.Label(master=self.frame1, bg=var.bg_frame_haut, text=var.nom, height=2, anchor='w')
-        #self.lab_nom_projet.grid(row=0, column=0, padx=5, pady=5, sticky='ew')
 
         # Assurez-vous que la colonne s'étende
         self.frame1.columnconfigure(0, weight=1)
@@ -61,18 +60,21 @@ class main:
 
         self.toolbar = design.creer_toolbar(self.frame2)
         self.bold_button, self.italic_button, self.sl_button = design.creer_boutons_toolbar(self.toolbar, self.toggle_bold, self.toggle_italic, self.toggle_sl)
-        var.text_widget = design.creer_zone_texte(self.frame2)
+        self.text_widget = design.creer_zone_texte(self.frame2)
+
         self.lab_version = design.creer_label_version(self.frame_bas)
         self.menubar = design.create_menu()
         self.master.config(menu=self.menubar)
-        design.configurer_tags_texte(var.text_widget)
+        design.configurer_tags_texte(self.text_widget)
 
     def update_text_widget(self):
         if hasattr(var, 'text_widget') and var.text_widget is not None:
-            var.text_widget.destroy()
-
-        var.text_widget = design.creer_zone_texte(self.frame2)
-        var.text_widget.pack(fill=tk.BOTH, expand=True)
+            self.text_widget.destroy()
+        self.text_widget = design.creer_zone_texte(self.frame2)
+        self.text_widget.pack(fill=tk.BOTH, expand=True)
+        self.scrollbar = ttk.Scrollbar(self.text_widget, orient="vertical", command=self.text_widget.yview)
+        self.scrollbar.pack(side="right", fill="y")
+        self.text_widget.configure(yscrollcommand=self.scrollbar.set)
 
     def update_menu(self):
         if self.menubar is not None:
@@ -105,44 +107,44 @@ class main:
         self.frame1.columnconfigure(0, weight=1)
 
     def toggle_bold(self):
-        current_font = tk.font.Font(font=var.text_widget["font"])
-        var.text_widget.tag_configure("bold", font=(current_font.actual("family"), current_font.actual("size"), "bold"))
+        current_font = tk.font.Font(font=self.text_widget["font"])
+        self.text_widget.tag_configure("bold", font=(current_font.actual("family"), current_font.actual("size"), "bold"))
 
         try:
-            if var.text_widget.tag_ranges("sel"):
-                current_tags = var.text_widget.tag_names("sel.first")
+            if self.text_widget.tag_ranges("sel"):
+                current_tags = self.text_widget.tag_names("sel.first")
                 if "bold" in current_tags:
-                    var.text_widget.tag_remove("bold", "sel.first", "sel.last")
+                    self.text_widget.tag_remove("bold", "sel.first", "sel.last")
                 else:
-                    var.text_widget.tag_add("bold", "sel.first", "sel.last")
+                    self.text_widget.tag_add("bold", "sel.first", "sel.last")
         except tk.TclError:
             pass
     def toggle_italic(self):
-        current_font = tk.font.Font(font=var.text_widget["font"])
-        var.text_widget.tag_configure("italic",
+        current_font = tk.font.Font(font=self.text_widget["font"])
+        self.text_widget.tag_configure("italic",
                                       font=(current_font.actual("family"), current_font.actual("size"), "italic"))
 
         try:
-            if var.text_widget.tag_ranges("sel"):
-                current_tags = var.text_widget.tag_names("sel.first")
+            if self.text_widget.tag_ranges("sel"):
+                current_tags = self.text_widget.tag_names("sel.first")
                 if "italic" in current_tags:
-                    var.text_widget.tag_remove("italic", "sel.first", "sel.last")
+                    self.text_widget.tag_remove("italic", "sel.first", "sel.last")
                 else:
-                    var.text_widget.tag_add("italic", "sel.first", "sel.last")
+                    self.text_widget.tag_add("italic", "sel.first", "sel.last")
         except tk.TclError:
             pass
     def toggle_sl(self):
-        current_font = tk.font.Font(font=var.text_widget["font"])
-        var.text_widget.tag_configure("underline", font=(current_font.actual("family"), current_font.actual("size")),
+        current_font = tk.font.Font(font=self.text_widget["font"])
+        self.text_widget.tag_configure("underline", font=(current_font.actual("family"), current_font.actual("size")),
                                       underline=True)
 
         try:
-            if var.text_widget.tag_ranges("sel"):
-                current_tags = var.text_widget.tag_names("sel.first")
+            if self.text_widget.tag_ranges("sel"):
+                current_tags = self.text_widget.tag_names("sel.first")
                 if "underline" in current_tags:
-                    var.text_widget.tag_remove("underline", "sel.first", "sel.last")
+                    self.text_widget.tag_remove("underline", "sel.first", "sel.last")
                 else:
-                    var.text_widget.tag_add("underline", "sel.first", "sel.last")
+                    self.text_widget.tag_add("underline", "sel.first", "sel.last")
         except tk.TclError:
             pass
     def update_label(self, new_text):
@@ -180,11 +182,7 @@ class main:
         print("effacer"+var.chapitre)
         id = var.chapitre
         fct_main.delete_chapitre(id, "chapitre")
-    def tag_configure(self, param, font):
-        pass
 
-
-# Création de la fenêtre principale
 root = tk.Tk()
 
 page_principale = main(root)

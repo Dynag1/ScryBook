@@ -7,9 +7,6 @@ from pathlib import Path
 from threading import Thread
 from tkinter import filedialog
 from tkinter.messagebox import showinfo
-import src.var as var
-import src.design as design
-import src.db as db
 from src import var, design, db, sous_fenetre
 
 
@@ -147,67 +144,65 @@ def save_projet():
             return "\n".join(content).rstrip('\n')  # Supprime le dernier \n
 
         with open(var.dossier_projet+"/"+var.chapitre, "w", encoding='utf-8') as f:
-            content = get_formatted_content(var.text_widget)
+            content = get_formatted_content(var.app_instance.text_widget)
             f.write(content)
 ##### Nouveau Chapitre #####
 def nouveau_chapitre():
     sous_fenetre.fenetre_chapitre()
 ##### Ouvrir un projet
+def apply_formatted_content(text_widget, content):
+    #text_widget.delete('1.0', tk.END)  # Efface le contenu actuel
+    lines = content.split('\n')
+    for line in lines:
+        start_index = text_widget.index(tk.INSERT)
+        in_bold = False
+        in_italic = False
+        in_underline = False
+        i = 0
+        while i < len(line):
+            if line[i:].startswith('<b>'):
+                in_bold = True
+                i += 3
+            elif line[i:].startswith('</b>'):
+                in_bold = False
+                i += 4
+            elif line[i:].startswith('<i>'):
+                in_italic = True
+                i += 3
+            elif line[i:].startswith('</i>'):
+                in_italic = False
+                i += 4
+            elif line[i:].startswith('<u>'):
+                in_underline = True
+                i += 3
+            elif line[i:].startswith('</u>'):
+                in_underline = False
+                i += 4
+            else:
+                text_widget.insert(tk.INSERT, line[i])
+                end_index = text_widget.index(tk.INSERT)
+                if in_bold:
+                    text_widget.tag_add("bold", start_index, end_index)
+                if in_italic:
+                    text_widget.tag_add("italic", start_index, end_index)
+                if in_underline:
+                    text_widget.tag_add("underline", start_index, end_index)
+                start_index = end_index
+                i += 1
+        text_widget.insert(tk.INSERT, '\n')
 def ouvrir_chapitre(id):
     var.chapitre = id
     try:
-        if not os.path.exists(var.dossier_projet+"/"+id):
-            with open(var.dossier_projet+"/"+id, 'w', encoding='utf-8') as f:
+        if not os.path.exists(var.dossier_projet + "/" + id):
+            with open(var.dossier_projet + "/" + id, 'w', encoding='utf-8') as f:
                 f.write("")
-        with open(var.dossier_projet+"/"+id, 'r', encoding='utf-8') as f:
+        with open(var.dossier_projet + "/" + id, 'r', encoding='utf-8') as f:
             contenu = f.read()
-        var.text_widget.delete('1.0', tk.END)  # Efface le contenu actuel
 
-        def apply_formatted_content(self, content):
-            lines = content.split('\n')
-            for line in lines:
-                start_index = self.index(tk.INSERT)
-                in_bold = False
-                in_italic = False
-                in_underline = False
-                i = 0
-                while i < len(line):
-                    if line[i:].startswith('<b>'):
-                        in_bold = True
-                        i += 3
-                    elif line[i:].startswith('</b>'):
-                        in_bold = False
-                        i += 4
-                    elif line[i:].startswith('<i>'):
-                        in_italic = True
-                        i += 3
-                    elif line[i:].startswith('</i>'):
-                        in_italic = False
-                        i += 4
-                    elif line[i:].startswith('<u>'):
-                        in_underline = True
-                        i += 3
-                    elif line[i:].startswith('</u>'):
-                        in_underline = False
-                        i += 4
-                    else:
-                        self.insert(tk.INSERT, line[i])
-                        end_index = self.index(tk.INSERT)
-                        if in_bold:
-                            self.tag_add("bold", start_index, end_index)
-                        if in_italic:
-                            self.tag_add("italic", start_index, end_index)
-                        if in_underline:
-                            self.tag_add("underline", start_index, end_index)
-                        start_index = end_index
-                        i += 1
-                self.insert(tk.INSERT, '\n')
-
-        #var.text_widget.insert(tk.END, contenu)  # Insère le nouveau contenu
-
+        var.app_instance.update_text_widget()
+        apply_formatted_content(var.app_instance.text_widget, contenu)
     except Exception as e:
         tk.messagebox.showerror("Erreur", f"Impossible d'ouvrir le fichier : {str(e)}")
-    apply_formatted_content(var.text_widget, contenu)
 ##### Supprimer le chapite #####
 def delete_chapitre(id, chapitre):
     chemin_fichier = var.dossier_projet+"/"+id

@@ -1,12 +1,9 @@
 import tkinter as tk
-import src.var as var
+from src import var, fct_main, export_pdf, export_docx, export_epub
 from tkinter import font, messagebox
-import src.fct_main as fct_main
 import src.sous_fenetre as sfenetre
 from tkinter import ttk
-import src.export_pdf as export_pdf
-import src.export_docx as export_docx
-import src.export_epub as export_epub
+
 
 def question_box(title, message):
     var = messagebox.askquestion(title, message)
@@ -70,16 +67,22 @@ def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl):
 
 
 def creer_zone_texte(parent):
-    print(var.param_police+" "+var.param_taille)
+    # Créer un cadre pour contenir le widget Text et la barre de défilement
+    if hasattr(var.app_instance, 'text_widget') and var.app_instance.text_widget.winfo_exists():
+        var.app_instance.text_widget.destroy()
     text_widget = tk.Text(parent, wrap="word", undo=True)
-    text_widget.config(font=(var.param_police, int(var.param_taille)), padx=20, pady=20, spacing1=4, spacing2=4, spacing3=4)
-    text_widget.pack(expand=True, fill="both")
+    text_widget.config(font=(var.param_police, int(var.param_taille)), padx=20, pady=0, spacing1=4, spacing2=4, spacing3=4)
+    text_widget.pack(side="left", expand=True, fill="both")
 
-    # Configurer les tags pour l'espacement uniforme augmenté
     text_widget.tag_configure("line_spacing", spacing1=8, spacing2=8, spacing3=8)
     text_widget.tag_add("line_spacing", "1.0", "end")
 
+    text_widget.tag_configure("bold", font=(var.param_police, int(var.param_taille), "bold"))
+    text_widget.tag_configure("italic", font=(var.param_police, int(var.param_taille), "italic"))
+    text_widget.tag_configure("underline", underline=True)
+
     return text_widget
+
 
 
 def projet_new():
@@ -126,6 +129,6 @@ def creer_label_version(frame_bas):
 def configurer_tags_texte(text_widget):
     text_widget.tag_configure("bold", font=font.Font(weight="bold"))
     text_widget.tag_configure("italic", font=font.Font(slant="italic"))
-def update_label_nom(new_text):
-    var.lab_nom_projet.config(text=new_text)
+#def update_label_nom(new_text):
+#    var.lab_nom_projet.config(text=new_text)
 
