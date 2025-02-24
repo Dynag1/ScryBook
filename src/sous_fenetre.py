@@ -655,7 +655,7 @@ def fen_lieux(id):
 def ouvrir_fenetre_parametres_edition():
     fenetre_param = tk.Toplevel()
     fenetre_param.title("Paramètres")
-    fenetre_param.geometry("300x200")
+    fenetre_param.geometry("300x300")
 
     # Récupérer la liste des polices système
     polices_systeme = list(font.families())
@@ -664,9 +664,9 @@ def ouvrir_fenetre_parametres_edition():
     # Récupérer les valeurs actuelles de la police et de la taille depuis la base de données
     conn = sqlite3.connect(var.dossier_projet + "/dbgene")
     cursor = conn.cursor()
-    cursor.execute("SELECT police, taille FROM param WHERE id = 1")
+    cursor.execute("SELECT police, taille, save_time FROM param WHERE id = 1")
     result = cursor.fetchone()
-    police_actuelle, taille_actuelle = result if result else ('', '12')
+    police_actuelle, taille_actuelle, save_time_actuelle = result if result else ('', '12', "30")
     conn.close()
 
     # Sélection de la police
@@ -682,11 +682,19 @@ def ouvrir_fenetre_parametres_edition():
     combo_taille = ttk.Combobox(fenetre_param, textvariable=var_taille, values=tailles)
     combo_taille.pack(pady=5)
 
+    # Sélection du délais d'enregistrement auto
+    tk.Label(fenetre_param, text="Sauvegarde auto (s) :").pack(pady=5)
+    save_time = list(range(10, 121, 10))  # Crée une liste de 10 à 120 par pas de 10
+    var_save_time = tk.StringVar(value=save_time_actuelle)  # Initialise avec la première valeur
+    combo_save_time = ttk.Combobox(fenetre_param, textvariable=var_save_time, values=save_time)
+    combo_save_time.pack(pady=5)
+
     # Bouton Sauvegarder
     def sauvegarder():
         var.param_police = var_police.get()
         var.param_taille = var_taille.get()
-        db.tab_param_update(var_police.get(), var_taille.get())
+        var.save_time = var_save_time.get()
+        db.tab_param_update(var_police.get(), var_taille.get(), var_save_time.get())
 
         fenetre_param.destroy()
 

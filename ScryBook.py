@@ -62,14 +62,9 @@ class main:
         self.toolbar = design.creer_toolbar(self.frame2)
         self.bold_button, self.italic_button, self.sl_button = design.creer_boutons_toolbar(self.toolbar, self.toggle_bold, self.toggle_italic, self.toggle_sl)
         var.text_widget = design.creer_zone_texte(self.frame2)
-
-
-
         self.lab_version = design.creer_label_version(self.frame_bas)
-
         self.menubar = design.create_menu()
         self.master.config(menu=self.menubar)
-
         design.configurer_tags_texte(var.text_widget)
 
     def update_text_widget(self):

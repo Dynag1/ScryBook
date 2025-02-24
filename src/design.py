@@ -103,7 +103,7 @@ def create_menu():
     menubar.add_cascade(label="Fichier", menu=menu1)
 
     menu2 = tk.Menu(menubar, tearoff=0)
-    menu2.add_command(label="Police", command=lambda: sfenetre.ouvrir_fenetre_parametres_edition())
+    menu2.add_command(label="Général", command=lambda: sfenetre.ouvrir_fenetre_parametres_edition())
     menu2.add_command(label="Informations", command=lambda: sfenetre.ouvrir_fenetre_parametres_information())
     if var.dossier_projet != "":
         menubar.add_cascade(label="Paramètres", menu=menu2)

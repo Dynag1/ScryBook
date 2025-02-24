@@ -10,7 +10,7 @@ from tkinter.messagebox import showinfo
 import src.var as var
 import src.design as design
 import src.db as db
-import src.sous_fenetre as s_fenetre
+from src import var, design, db, sous_fenetre
 
 
 #####################################################
@@ -92,6 +92,7 @@ def open_projet():
             design.create_menu()
             var.param_police = db.tab_param_lire("police")
             var.param_taille = db.tab_param_lire("taille")
+            var.save_time = int(db.tab_param_lire("save_time"))
             var.info_auteur = db.tab_info_lire("auteur")
             var.info_date = db.tab_info_lire("date")
             var.info_resume = db.tab_info_lire("resume")
@@ -150,7 +151,7 @@ def save_projet():
             f.write(content)
 ##### Nouveau Chapitre #####
 def nouveau_chapitre():
-    s_fenetre.fenetre_chapitre()
+    sous_fenetre.fenetre_chapitre()
 ##### Ouvrir un projet
 def ouvrir_chapitre(id):
     var.chapitre = id

@@ -146,7 +146,8 @@ def creer_table_gene(chemin):
                 CREATE TABLE IF NOT EXISTS param (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     police TEXT,
-                    taille TEXT
+                    taille TEXT,
+                    save_time
                 )
                 ''')
 
@@ -176,6 +177,7 @@ def creer_table_gene(chemin):
         'param': {
             'police': 'TEXT',
             'taille': 'TEXT',
+            'save_time': 'TEXT'
         }
     }
 
@@ -193,8 +195,18 @@ def creer_table_gene(chemin):
 
     conn.commit()
 
-    cursor.execute("INSERT INTO info (auteur, date, resume) VALUES (?, ?, ?)", ("auteur", "date", "resume"))
-    cursor.execute("INSERT INTO param (police, taille) VALUES (?, ?)", ("Helvetica", "12"))
+    cursor.execute("SELECT EXISTS(SELECT 1 FROM info WHERE id=1)")
+    row_exists = cursor.fetchone()[0]
+
+    if not row_exists:
+        # Insérer les données dans la table 'info' si la ligne n'existe pas
+        cursor.execute("INSERT INTO info (auteur, date, resume) VALUES (?, ?, ?)", ("auteur", "date", "resume"))
+    cursor.execute("SELECT EXISTS(SELECT 1 FROM param WHERE id=1)")
+    row_exists1 = cursor.fetchone()[0]
+    if not row_exists1:
+        # Insérer les données dans la table 'param'
+        cursor.execute("INSERT INTO param (police, taille, save_time) VALUES (?, ?, ?)", ("Helvetica", "12", "30"))
+
     conn.commit()
     conn.close()
     var.param_police = "Helvetica"
@@ -220,14 +232,15 @@ def tab_info_update(auteur, date, resume):
         conn.close()
     except Exception as e:
         fct_main.logs(e)
-def tab_param_update(police, taille):
+def tab_param_update(police, taille, save):
     try:
         conn = sqlite3.connect(var.dossier_projet + '/dbgene')
         cursor = conn.cursor()
-        cursor.execute("UPDATE param SET police = ?, taille = ? WHERE id = ?", (police, taille, 1))
+        cursor.execute("UPDATE param SET police = ?, taille = ?, save_time = ? WHERE id = '1'", (police, taille, save))
         conn.commit()
         conn.close()
     except Exception as e:
+        print(e)
         fct_main.logs(e)
 def tab_param_lire(varia):
     try:
@@ -238,6 +251,7 @@ def tab_param_lire(varia):
         result = cursor.fetchone()
         value = result[0]
     except Exception as e:
+        print(e)
         fct_main.logs(e)
     return value
 def tab_info_lire(varia):
