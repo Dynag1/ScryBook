@@ -161,8 +161,8 @@ def create_menu():
 
     menu3 = tk.Menu(menubar, tearoff=0)
     menu3.add_command(label="PDF", command=lambda : export_pdf.export())
-    menu3.add_command(label="Docx", command=lambda: export_docx.export_doc())
-    menu3.add_command(label="Epub", command=lambda: export_epub.export())
+    menu3.add_command(label="Docx", command=lambda: export_docx.exporter_textes_vers_docx())
+    menu3.add_command(label="Epub", command=lambda: export_epub.exporter_textes_vers_epub())
     if var.dossier_projet != "":
         menubar.add_cascade(label="Export", menu=menu3)
 

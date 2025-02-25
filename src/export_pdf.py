@@ -177,7 +177,7 @@ def select_files_and_create_pdf():
         return
 
     # Sélectionner l'emplacement et le nom du fichier PDF de sortie
-    output_file = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("Fichiers PDF", "*.pdf")])
+    output_file = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("Fichiers PDF", "*.pdf")], initialfile=var.nom+".pdf")
     if not output_file:
         return
 

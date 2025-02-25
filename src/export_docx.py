@@ -1,119 +1,88 @@
-import docx
-from docx.enum.style import WD_STYLE_TYPE
+from docx import Document
 from docx.shared import Pt
 import sqlite3
 import os
 import tkinter as tk
-from tkinter import filedialog, messagebox
-import src.var as var
+from tkinter import filedialog
+from src import var
 
 
-def create_doc(input_files, output_file, title, subtitle, author, resume):
-    doc = docx.Document()
-
-    # Utiliser les styles existants ou les créer si nécessaire
-    def get_or_create_style(name, base_style='Normal'):
-        if name not in doc.styles:
-            style = doc.styles.add_style(name, WD_STYLE_TYPE.PARAGRAPH)
-            style.base_style = doc.styles[base_style]
-        return doc.styles[name]
-
-    title_style = get_or_create_style('Title')
-    title_style.font.size = Pt(24)
-    title_style.font.bold = True
-
-    subtitle_style = get_or_create_style('Subtitle')
-    subtitle_style.font.size = Pt(18)
-    subtitle_style.font.italic = True
-
-    heading1_style = get_or_create_style('Heading 1')
-    heading1_style.font.size = Pt(16)
-    heading1_style.font.bold = True
-
-    toc_style = get_or_create_style('TOC 1')
-    toc_style.font.size = Pt(12)
-
-    # Page de titre
-    doc.add_paragraph(title, style='Title')
-    doc.add_paragraph(subtitle, style='Subtitle')
-    doc.add_paragraph(f"Par {author}")
-
-    doc.add_page_break()
-
-    # Sommaire
-    doc.add_paragraph("Sommaire", style='Title')
-    for _, chapter_title in input_files:
-        doc.add_paragraph(chapter_title, style='TOC 1')
-
-    doc.add_page_break()
-
-    # Contenu des chapitres
-    for input_file, chapter_title in input_files:
-        doc.add_heading(chapter_title, level=1)
-
-        with open(input_file, 'r', encoding='utf-8') as file:
-            content = file.read()
-
-        # Ajouter le contenu du chapitre
-        for paragraph in content.split('\n'):
-            if paragraph.strip():
-                doc.add_paragraph(paragraph.strip())
-
-        doc.add_page_break()
-
-    # Résumé
-    doc.add_heading("Résumé", level=1)
-    doc.add_paragraph(resume)
-
-    # Sauvegarder le document
-    doc.save(output_file)
-
-
-def get_file_paths_and_titles_from_database():
+def exporter_textes_vers_docx():
+    # Connexion à la base de données
     conn = sqlite3.connect(var.dossier_projet + '/dbchapitre')
-    cur = conn.cursor()
-    cur.execute("SELECT id, nom FROM chapitre ORDER BY numero")
-    results = cur.fetchall()
-    conn.close()
-    return [(os.path.join(var.dossier_projet, str(result[0])), result[1]) for result in results]
+    cursor = conn.cursor()
 
+    # Récupération des informations des chapitres
+    cursor.execute("SELECT id, nom FROM chapitre ORDER BY numero")
+    chapitres_db = cursor.fetchall()
 
-def export_doc():
-    input_files = get_file_paths_and_titles_from_database()
-    if not input_files:
-        messagebox.showwarning("Attention", "Aucun fichier trouvé dans la base de données.")
-        return
-
+    # Créer une fenêtre Tkinter (elle sera cachée)
     root = tk.Tk()
     root.withdraw()
 
-    output_file = filedialog.asksaveasfilename(
+    # Préparer le nom de fichier par défaut
+    nom_fichier_defaut = f"{var.nom}.docx"
+
+    # Demander à l'utilisateur où enregistrer le fichier DOCX
+    fichier_sortie = filedialog.asksaveasfilename(
         defaultextension=".docx",
         filetypes=[("Word Document", "*.docx")],
-        title="Enregistrer le fichier Word"
+        title="Enregistrer le fichier DOCX",
+        initialfile=nom_fichier_defaut
     )
 
-    if not output_file:
-        messagebox.showinfo("Information", "Opération annulée.")
+    if not fichier_sortie:
+        print("Exportation annulée.")
         return
 
-    title = var.nom
+    # Créer un nouveau document Word
+    document = Document()
 
-    conn = sqlite3.connect(var.dossier_projet + '/dbgene')
-    cur = conn.cursor()
-    cur.execute("SELECT stitre, auteur, resume FROM info WHERE id=1")
-    result = cur.fetchone()
+    # Ajouter la page de garde
+    document.add_heading(var.nom, 0)
+    document.add_paragraph(var.info_stitre)
+    document.add_paragraph(f"Par {var.info_auteur}")
+
+    # Ajouter une page de sommaire
+    document.add_page_break()
+    document.add_heading('Sommaire', level=1)
+
+    for id_chapitre, titre_chapitre in chapitres_db:
+        document.add_paragraph(titre_chapitre)
+
+    # Ajouter les chapitres
+    for id_chapitre, titre_chapitre in chapitres_db:
+        document.add_page_break()
+        document.add_heading(titre_chapitre, level=1)
+
+        nom_fichier = f"{id_chapitre}"
+        chemin_fichier = os.path.join(var.dossier_projet, nom_fichier)
+
+        if os.path.exists(chemin_fichier):
+            with open(chemin_fichier, 'r', encoding='utf-8') as f:
+                contenu = f.read().strip()
+
+            for ligne in contenu.split('\n'):
+                if ligne.startswith('# '):
+                    document.add_heading(ligne[2:], level=2)
+                elif ligne.startswith('## '):
+                    document.add_heading(ligne[3:], level=3)
+                else:
+                    p = document.add_paragraph(ligne)
+                    for run in p.runs:
+                        if '<b>' in run.text:
+                            run.bold = True
+                        if '<i>' in run.text:
+                            run.italic = True
+                        if '<u>' in run.text:
+                            run.underline = True
+                        run.text = run.text.replace('<b>', '').replace('</b>', '')
+                        run.text = run.text.replace('<i>', '').replace('</i>', '')
+                        run.text = run.text.replace('<u>', '').replace('</u>', '')
+
+    # Sauvegarder le document
+    document.save(fichier_sortie)
+    print(f"Le fichier DOCX a été enregistré sous : {fichier_sortie}")
+
+    # Fermer la connexion à la base de données
     conn.close()
-
-    subtitle = result[0] if result else "Sous-titre par défaut"
-    author = result[1] if result else "Auteur inconnu"
-    resume = result[2] if result and len(result) > 2 else "Résumé non disponible"
-
-    try:
-        create_doc(input_files, output_file, title, subtitle, author, resume)
-        messagebox.showinfo("Succès", f"Le fichier Word a été créé : {output_file}")
-    except Exception as e:
-        messagebox.showerror("Erreur", f"Une erreur s'est produite lors de la création du fichier Word : {str(e)}")
-
-
-

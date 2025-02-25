@@ -1,4 +1,4 @@
-version = "00.00.02"
+version = "00.00.03"
 nom = "ScryBook"
 site = 'http://prog.dynag.co'
 bg_frame_haut = "#9a9a9a"
@@ -25,6 +25,7 @@ list_chapitre = ""
 param_police = "Helvetica"
 param_taille = "12"
 
+info_stitre = ""
 info_auteur = ""
 info_date = ""
 info_resume = ""
