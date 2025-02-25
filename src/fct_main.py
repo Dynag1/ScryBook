@@ -32,6 +32,8 @@ def creer_dossier(nom):
         dossier.mkdir(parents=True, exist_ok=True)
 ##### Nouveau Projet #####
 def projet_new():
+    if var.dossier_projet != "":
+        close_projet()
     chemin_fichier = filedialog.asksaveasfilename(
         defaultextension=".sb",
         filetypes=[("Fichiers texte", "*.sb")],
@@ -61,6 +63,8 @@ def projet_new():
         alert("Opération annulée.")
 ##### Ouvrir un projet #####
 def open_projet():
+    if var.dossier_projet != "":
+        close_projet()
     chemin_fichier = filedialog.askopenfilename(
         title="Sélectionner un fichier .sb",
         filetypes=[("Fichiers SB", "*.sb"), ("Tous les fichiers", "*.*")]
@@ -105,9 +109,29 @@ def enregistrement_auto(tk=None):
         if var.dossier_projet == "":
             tourne = False
             Thread.curentThread.join()
+        if var.save_time == 0:
+            print("Stop save")
+            tourne  =False
         save_projet()
         print("save")
         time.sleep(var.save_time)
+def close_projet():
+    var.dossier_projet = ""
+    var.nom = ""
+    var.app_instance.update_titre()
+    design.creer_bouton_haut()
+    design.create_menu()
+    var.param_police = "Helvetica"
+    var.param_taille = "10"
+    var.save_time = 0
+    var.info_auteur = ""
+    var.info_date = ""
+    var.info_resume = ""
+    var.app_instance.update_text_widget()
+    var.app_instance.update_menu()
+    var.app_instance.update_txt_resume()
+    for item in var.app_instance.list_chapitre.get_children():
+        var.app_instance.list_chapitre.delete(item)
 #####################################################
 ##### Chapitre                                  #####
 #####################################################
@@ -201,6 +225,11 @@ def ouvrir_chapitre(id):
 
         var.app_instance.update_text_widget()
         apply_formatted_content(var.app_instance.text_widget, contenu)
+        resume = db.lire("chapitre", id, "resume")
+        var.app_instance.update_txt_resume()
+        var.app_instance.txt_resume.insert(1.0, resume)
+
+
     except Exception as e:
         tk.messagebox.showerror("Erreur", f"Impossible d'ouvrir le fichier : {str(e)}")
 ##### Supprimer le chapite #####

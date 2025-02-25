@@ -684,7 +684,7 @@ def ouvrir_fenetre_parametres_edition():
 
     # Sélection du délais d'enregistrement auto
     tk.Label(fenetre_param, text="Sauvegarde auto (s) :").pack(pady=5)
-    save_time = list(range(10, 121, 10))  # Crée une liste de 10 à 120 par pas de 10
+    save_time = list(range(0, 121, 10))  # Crée une liste de 10 à 120 par pas de 10
     var_save_time = tk.StringVar(value=save_time_actuelle)  # Initialise avec la première valeur
     combo_save_time = ttk.Combobox(fenetre_param, textvariable=var_save_time, values=save_time)
     combo_save_time.pack(pady=5)

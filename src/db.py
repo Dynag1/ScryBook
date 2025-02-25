@@ -73,11 +73,11 @@ def liste_chapitre():
     except Exception as e:
         print(e)
     # Insertion des données dans le Treeview
-    for item in var.list_chapitre.get_children():
-        var.list_chapitre.delete(item)
+    for item in var.app_instance.list_chapitre.get_children():
+        var.app_instance.list_chapitre.delete(item)
     for ligne in donnees:
         valeurs_reordonnees = (ligne[0], ligne[2], ligne[1])
-        var.list_chapitre.insert("", tk.END, values=valeurs_reordonnees)
+        var.app_instance.list_chapitre.insert("", tk.END, values=valeurs_reordonnees)
 
     # Fermeture de la connexion
     conn.close()
@@ -95,19 +95,21 @@ def effacer(id, type):
         conn.commit()
         conn.close()
 ##### Lire #####
-def lire(type, id, varia, curseur=None):
+def lire(type, id, varia):
     if type == "chapitre":
         try:
             conn = sqlite3.connect(var.dossier_projet + "/dbchapitre")
             cursor = conn.cursor()
+            requete = "SELECT " + varia + " FROM chapitre WHERE id = ?"
+            cursor.execute(requete, (id,))
+            resultat = cursor.fetchone()
+            if resultat:
+                texte = str(resultat[0])
         except Exception as e:
-            fct_main.logs(e)
+            print(e)
+            #fct_main.logs(e)
 
-        requete = "SELECT "+varia+" FROM chapitre WHERE id = ?"
-        cursor.execute(requete, (id,))
-        resultat = cursor.fetchone()
-        if resultat:
-            texte = str(resultat[0])
+
 
     return texte
 

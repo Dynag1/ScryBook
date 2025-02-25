@@ -26,6 +26,7 @@ class main:
         thread.start()
         fct_main.creer_dossier("Projets")
         var.frame_haut = design.creer_frame_haut(master)
+
         self.frame_main = design.creer_frame_main(master)
         self.frame_bas = design.creer_frame_bas(master)
         self.frame1, self.frame2 = design.creer_sous_frames(self.frame_main)
@@ -38,25 +39,14 @@ class main:
         design.creer_bouton_haut()
         self.but_chapitre = ttk.Button(self.frame1, text="Nouveau chapitre", command=fct_main.nouveau_chapitre).grid(row=2, column=0, padx=5, pady=5)
 
-        var.list_chapitre = ttk.Treeview(self.frame1, height=10, columns=("ID", "Numero", "Nom"), show="headings")
-
-        # Configuration des en-têtes
-        var.list_chapitre.heading("ID", text="ID")
-        var.list_chapitre.heading("Numero", text="Numéro")
-        var.list_chapitre.heading("Nom", text="Nom")
-
-        # Configuration des colonnes
-        var.list_chapitre.column("ID", width=0, stretch=tk.NO)
-        var.list_chapitre.column("Numero", width=50, stretch=tk.NO)
-        var.list_chapitre.column("Nom", width=100, stretch=tk.YES)
+        self.list_chapitre = design.creer_list_chapitre(self.frame1)
 
         # Liaison des événements
-        var.list_chapitre.bind('<ButtonRelease-1>', self.item_selected)
-        var.list_chapitre.bind('<Button-3>', self.right_clic)
-        var.list_chapitre.bind('<Double-1>', lambda e: self.resume())
+        self.list_chapitre.bind('<ButtonRelease-1>', self.item_selected)
+        self.list_chapitre.bind('<Button-3>', self.right_clic)
+        self.list_chapitre.bind('<Double-1>', lambda e: self.resume())
 
-        # Positionnement du Treeview
-        var.list_chapitre.grid(row=1, column=0, padx=5, pady=5)
+        self.txt_resume = design.creer_zone_text_resume(self.frame1)
 
         self.toolbar = design.creer_toolbar(self.frame2)
         self.bold_button, self.italic_button, self.sl_button = design.creer_boutons_toolbar(self.toolbar, self.toggle_bold, self.toggle_italic, self.toggle_sl)
@@ -75,6 +65,12 @@ class main:
         self.scrollbar = ttk.Scrollbar(self.text_widget, orient="vertical", command=self.text_widget.yview)
         self.scrollbar.pack(side="right", fill="y")
         self.text_widget.configure(yscrollcommand=self.scrollbar.set)
+
+    def update_txt_resume(self):
+        if hasattr(var, 'txt_resume') and var.txt_resume is not None:
+            self.txt_resume.destroy()
+        self.txt_resume = design.creer_zone_text_resume(self.frame1)
+
 
     def update_menu(self):
         if self.menubar is not None:
@@ -147,12 +143,12 @@ class main:
                     self.text_widget.tag_add("underline", "sel.first", "sel.last")
         except tk.TclError:
             pass
-    def update_label(self, new_text):
-        self.nom_projet.config(text=new_text)
+    #def update_label(self, new_text):
+    #    self.nom_projet.config(text=new_text)
     def item_selected(self, event):
         fct_main.save_projet()
-        selected_item = var.list_chapitre.selection()
-        result = var.list_chapitre.item(selected_item)["values"]
+        selected_item = self.list_chapitre.selection()
+        result = self.list_chapitre.item(selected_item)["values"]
         try:
             id = str(result[0])
             var.chapitre = id
@@ -161,13 +157,13 @@ class main:
         fct_main.ouvrir_chapitre(id)
     def right_clic(self, event):
         # create a popup menu
-        selected_item = var.list_chapitre.selection()[0]
+        selected_item = self.list_chapitre.selection()[0]
 
-        rowID = var.list_chapitre.identify('item', event.x, event.y)
+        rowID = self.list_chapitre.identify('item', event.x, event.y)
         if rowID:
-            var.list_chapitre.selection_set(rowID)
-            var.list_chapitre.focus_set()
-            var.list_chapitre.focus(rowID)
+            self.list_chapitre.selection_set(rowID)
+            self.list_chapitre.focus_set()
+            self.list_chapitre.focus(rowID)
 
             menu_tree = tk.Menu(self.master, tearoff=0)
             menu_tree.add_separator()
