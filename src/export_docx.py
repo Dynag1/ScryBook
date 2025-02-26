@@ -1,11 +1,12 @@
 from docx import Document
 from docx.shared import Pt
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 import sqlite3
 import os
 import tkinter as tk
 from tkinter import filedialog
-from src import var
-
+from src import var, fct_main
 
 def exporter_textes_vers_docx():
     # Connexion à la base de données
@@ -80,8 +81,27 @@ def exporter_textes_vers_docx():
                         run.text = run.text.replace('<i>', '').replace('</i>', '')
                         run.text = run.text.replace('<u>', '').replace('</u>', '')
 
+    # Ajouter un numéro de page dans le pied de page
+    section = document.sections[-1]
+    footer = section.footer
+    paragraph = footer.paragraphs[0]
+    run = paragraph.add_run()
+    fldChar1 = OxmlElement('w:fldChar')
+    fldChar1.set(qn('w:fldCharType'), 'begin')
+    instrText = OxmlElement('w:instrText')
+    instrText.text = "PAGE"
+    fldChar2 = OxmlElement('w:fldChar')
+    fldChar2.set(qn('w:fldCharType'), 'end')
+    run._element.append(fldChar1)
+    run._element.append(instrText)
+    run._element.append(fldChar2)
+
     # Sauvegarder le document
-    document.save(fichier_sortie)
+    try:
+        document.save(fichier_sortie)
+        fct_main.alert(f"Le fichier DOCX a été enregistré sous : {fichier_sortie}")
+    except Exception as e:
+        fct_main.alert(f"Une erreur est survenue : {e}")
     print(f"Le fichier DOCX a été enregistré sous : {fichier_sortie}")
 
     # Fermer la connexion à la base de données

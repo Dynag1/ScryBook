@@ -10,8 +10,9 @@ from reportlab.lib.units import cm
 from reportlab.pdfgen import canvas
 import tkinter as tk
 from tkinter import filedialog, messagebox
-import src.var as var
-import src.fct_main as fct_main
+from src import var, fct_main
+
+
 
 
 class NumberedCanvas(canvas.Canvas):
@@ -208,6 +209,7 @@ def export():
     root.withdraw()
 
     # Appeler la fonction pour sélectionner l'emplacement de sortie et créer le PDF
+
     select_files_and_create_pdf()
 
 # Appel de la fonction d'export

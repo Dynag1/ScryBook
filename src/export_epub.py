@@ -4,7 +4,7 @@ import re
 import os
 import tkinter as tk
 from tkinter import filedialog
-from src import var
+from src import var, fct_main
 
 def exporter_textes_vers_epub():
     # Connexion à la base de données
@@ -119,8 +119,11 @@ def exporter_textes_vers_epub():
     livre.add_item(epub.EpubNcx())
     livre.add_item(epub.EpubNav())
 
-    epub.write_epub(fichier_sortie, livre, {})
-    print(f"Le fichier EPUB a été enregistré sous : {fichier_sortie}")
+    try:
+        epub.write_epub(fichier_sortie, livre, {})
+        fct_main.alert(f"Le fichier DOCX a été enregistré sous : {fichier_sortie}")
+    except Exception as e:
+        fct_main.alert(f"Une erreur est survenue : {e}")
 
     # Fermer la connexion à la base de données
     conn.close()
