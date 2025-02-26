@@ -62,9 +62,9 @@ class main:
             self.text_widget.destroy()
         self.text_widget = design.creer_zone_texte(self.frame2)
         self.text_widget.pack(fill=tk.BOTH, expand=True)
-        self.scrollbar = ttk.Scrollbar(self.text_widget, orient="vertical", command=self.text_widget.yview)
+    """ self.scrollbar = ttk.Scrollbar(self.frame2, orient="vertical", command=self.text_widget.yview)
         self.scrollbar.pack(side="right", fill="y")
-        self.text_widget.configure(yscrollcommand=self.scrollbar.set)
+        self.text_widget.configure(yscrollcommand=self.scrollbar.set)"""
 
     def update_txt_resume(self):
         if hasattr(var, 'txt_resume') and var.txt_resume is not None:
@@ -165,11 +165,11 @@ class main:
             self.list_chapitre.focus_set()
             self.list_chapitre.focus(rowID)
 
-            menu_tree = tk.Menu(self.master, tearoff=0)
-            menu_tree.add_separator()
-            menu_tree.add_command(label="Résumé", command=self.resume)
-            menu_tree.add_command(label="Effacer", command=self.delete)
-            menu_tree.post(event.x_root, event.y_root)
+            self.menu_tree = tk.Menu(self.master, tearoff=0)
+            self.menu_tree.add_separator()
+            self.menu_tree.add_command(label="Résumé", command=self.resume)
+            self.menu_tree.add_command(label="Effacer", command=self.delete)
+            self.menu_tree.post(event.x_root, event.y_root)
         else:
             pass
     def resume(self):

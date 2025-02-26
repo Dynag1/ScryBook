@@ -1,4 +1,6 @@
 import tkinter as tk
+import webbrowser
+
 from src import var, fct_main, export_pdf, export_docx, export_epub
 from tkinter import font, messagebox
 import src.sous_fenetre as sfenetre
@@ -165,6 +167,12 @@ def create_menu():
     menu3.add_command(label="Epub", command=lambda: export_epub.exporter_textes_vers_epub())
     if var.dossier_projet != "":
         menubar.add_cascade(label="Export", menu=menu3)
+
+    menu4 = tk.Menu(menubar, tearoff=0)
+    menu4.add_command(label="Readme", command=lambda: webbrowser.open('https://github.com/Dynag1/ScryBook/blob/master/README.md'))
+    menu4.add_command(label="Changelog", command=lambda: webbrowser.open('https://github.com/Dynag1/ScryBook/blob/master/Changelog.md'))
+    menu4.add_command(label="Site internet", command=lambda: webbrowser.open('https://prog.dynag.co'))
+    menubar.add_cascade(label="?", menu=menu4)
 
     menubar.bind_all('<Control-s>', rac_s)
 

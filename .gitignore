@@ -6,3 +6,7 @@
 /.idea/inspectionProfiles/profiles_settings.xml
 /.idea/ScryBook.iml
 /ScryBook_Setup.exe
+/post_build.py
+/creer_exe.bat
+/setup.iss
+
