@@ -78,14 +78,16 @@ def creer_toolbar(parent):
     toolbar.pack(side="top", fill="x")
     return toolbar
 
-def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl):
+def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl, corrige):
     bold_button = ttk.Button(toolbar, text="Gras", command=toggle_bold)
     bold_button.pack(side="left", padx=2, pady=2)
     italic_button = ttk.Button(toolbar, text="Italique", command=toggle_italic)
     italic_button.pack(side="left", padx=2, pady=2)
     sl_button = ttk.Button(toolbar, text="Sousligné", command=toggle_sl)
     sl_button.pack(side="left", padx=2, pady=2)
-    return bold_button, italic_button, sl_button
+    corrige_button = ttk.Button(toolbar, text="Corriger", command=corrige)
+    corrige_button.pack(side="left", padx=2, pady=2)
+    return bold_button, italic_button, sl_button, corrige
 
 def creer_zone_texte(parent):
     # Créer un cadre pour contenir le widget Text et la barre de défilement

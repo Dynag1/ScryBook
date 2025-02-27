@@ -11,7 +11,7 @@ from reportlab.pdfgen import canvas
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from src import var, fct_main
-
+import reportlab
 
 
 

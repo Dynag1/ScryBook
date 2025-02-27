@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "ScryBook"
-#define MyAppVersion "00.00.03"
+#define MyAppVersion "00.01.00"
 #define MyAppPublisher "Hemge"
 #define MyAppURL "https://prog.hemge.eu"
 #define MyAppExeName "ScryBook.exe"

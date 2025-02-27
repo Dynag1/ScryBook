@@ -1,10 +1,13 @@
 import os
 import threading
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, Menu
 import tkinter.font as tkFont
-from src import var, design, fct_main, sous_fenetre, thread_maj
-
+from src import var, design, fct_main, sous_fenetre, thread_maj, verif_ortho
+from textblob import TextBlob
+from src.verif_ortho import CorrectionOrthographique
+from spellchecker import SpellChecker
+import re
 
 global app_instance
 app_instance = None
@@ -26,7 +29,6 @@ class main:
         thread.start()
         fct_main.creer_dossier("Projets")
         var.frame_haut = design.creer_frame_haut(master)
-
         self.frame_main = design.creer_frame_main(master)
         self.frame_bas = design.creer_frame_bas(master)
         self.frame1, self.frame2 = design.creer_sous_frames(self.frame_main)
@@ -49,19 +51,71 @@ class main:
         self.txt_resume = design.creer_zone_text_resume(self.frame1)
 
         self.toolbar = design.creer_toolbar(self.frame2)
-        self.bold_button, self.italic_button, self.sl_button = design.creer_boutons_toolbar(self.toolbar, self.toggle_bold, self.toggle_italic, self.toggle_sl)
+        self.bold_button, self.italic_button, self.sl_button, self.corrige = design.creer_boutons_toolbar(self.toolbar, self.toggle_bold, self.toggle_italic, self.toggle_sl, self.verifier_orthographe)
         self.text_widget = design.creer_zone_texte(self.frame2)
+        self.text_widget.tag_configure("erreur", foreground="red")
 
+
+
+        self.spell = SpellChecker(language='fr')
+
+        self.text_widget.bind("<space>", self.verifier_orthographe)
+        self.text_widget.bind("<Return>", self.verifier_orthographe)
+
+        self.menu_correction = tk.Menu(self.master, tearoff=0)
         self.lab_version = design.creer_label_version(self.frame_bas)
         self.menubar = design.create_menu()
         self.master.config(menu=self.menubar)
         design.configurer_tags_texte(self.text_widget)
+
+        # Créer le menu de correction
+        self.menu_correction = tk.Menu(self.master, tearoff=0)
+
+        # Initialiser le vérificateur d'orthographe
+        self.spell = SpellChecker(language='fr')
+
+        # Initialiser la classe de correction orthographique
+        self.correcteur = CorrectionOrthographique(self.text_widget, self.spell, self.menu_correction)
+
+        # Lier les événements
+        self.text_widget.bind('<KeyRelease>', self.correcteur.verifier_orthographe)
+        self.text_widget.bind('<Button-3>', self.correcteur.afficher_menu_correction)
+
+        # Configurer le tag pour les erreurs
+        self.text_widget.tag_configure("erreur", foreground="red", underline=True)
+
+    def verifier_orthographe(self):
+        self.correcteur = CorrectionOrthographique(self.text_widget, self.spell, self.menu_correction)
 
     def update_text_widget(self):
         if hasattr(var, 'text_widget') and var.text_widget is not None:
             self.text_widget.destroy()
         self.text_widget = design.creer_zone_texte(self.frame2)
         self.text_widget.pack(fill=tk.BOTH, expand=True)
+        self.text_widget.tag_configure("erreur", foreground="red")
+
+        # Créer le menu de correction
+        self.menu_correction = tk.Menu(self.master, tearoff=0)
+
+        # Initialiser le vérificateur d'orthographe
+        self.spell = SpellChecker(language='fr')
+
+        # Initialiser la classe de correction orthographique
+        self.correcteur = CorrectionOrthographique(self.text_widget, self.spell, self.menu_correction)
+
+        # Lier les événements
+        self.text_widget.bind('<KeyRelease>', self.correcteur.verifier_orthographe)
+        self.text_widget.bind('<Button-3>', self.correcteur.afficher_menu_correction)
+
+        # Configurer le tag pour les erreurs
+        self.text_widget.tag_configure("erreur", foreground="red", underline=True)
+
+
+        """self.spell = SpellChecker(language='fr')
+        self.menu_correction = Menu(self.frame2, tearoff=0)
+        self.text_widget.bind("<space>", self.verifier_orthographe)
+        self.text_widget.bind("<Return>", self.verifier_orthographe)
+        self.text_widget.bind("<Button-3>", self.afficher_menu_correction)"""
     """ self.scrollbar = ttk.Scrollbar(self.frame2, orient="vertical", command=self.text_widget.yview)
         self.scrollbar.pack(side="right", fill="y")
         self.text_widget.configure(yscrollcommand=self.scrollbar.set)"""
@@ -155,6 +209,9 @@ class main:
         except Exception as e:
             print(e)
         fct_main.ouvrir_chapitre(id)
+
+
+
     def right_clic(self, event):
         # create a popup menu
         selected_item = self.list_chapitre.selection()[0]
