@@ -149,7 +149,8 @@ def creer_table_gene(chemin):
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     police TEXT,
                     taille TEXT,
-                    save_time
+                    save_time TEXT,
+                    langue TEXT
                 )
                 ''')
 
@@ -179,7 +180,8 @@ def creer_table_gene(chemin):
         'param': {
             'police': 'TEXT',
             'taille': 'TEXT',
-            'save_time': 'TEXT'
+            'save_time': 'TEXT',
+            'langue': 'TEXT'
         }
     }
 
@@ -215,6 +217,60 @@ def creer_table_gene(chemin):
     var.param_taille = "12"
     print("Base de données 'dbgene' et tables mises à jour avec succès.")
 
+def creer_table_param():
+    # Connexion à la base de données (la crée si elle n'existe pas)
+    print(var.path_dossier + "/dbgene")
+    conn = sqlite3.connect(var.path_dossier + "/dbgene")
+    cursor = conn.cursor()
+
+
+    # Création des tables si elles n'existent pas
+    cursor.execute('''
+                CREATE TABLE IF NOT EXISTS param (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    police TEXT,
+                    taille TEXT,
+                    save_time TEXT,
+                    langue TEXT
+                )
+                ''')
+
+    # Définition des champs attendus pour chaque table
+    champs_attendus = {
+        'param': {
+            'police': 'TEXT',
+            'taille': 'TEXT',
+            'save_time': 'TEXT',
+            'langue': 'TEXT'
+        }
+    }
+
+    # Vérification et ajout des champs manquants pour chaque table
+    for table, champs in champs_attendus.items():
+        cursor.execute(f"PRAGMA table_info({table})")
+        colonnes_existantes = [colonne[1] for colonne in cursor.fetchall()]
+
+        for champ, type_champ in champs.items():
+            if champ not in colonnes_existantes:
+                cursor.execute(f"ALTER TABLE {table} ADD COLUMN {champ} {type_champ}")
+                print(f"Champ '{champ}' ajouté à la table '{table}'.")
+
+
+
+    conn.commit()
+
+    cursor.execute("SELECT EXISTS(SELECT 1 FROM param WHERE id=1)")
+    row_exists1 = cursor.fetchone()[0]
+    if not row_exists1:
+        # Insérer les données dans la table 'param'
+        cursor.execute("INSERT INTO param (police, taille, save_time, langue) VALUES (?, ?, ?, ?)", ("Helvetica", "12", "30", "en"))
+
+    conn.commit()
+    conn.close()
+    var.param_police = "Helvetica"
+    var.param_taille = "12"
+    print("Base de données 'dbgene' et tables mises à jour avec succès.")
+
 def tab_gene_del(id, table):
     try:
         conn = sqlite3.connect(var.dossier_projet + '/dbgene')
@@ -234,19 +290,20 @@ def tab_info_update(auteur, date, resume):
         conn.close()
     except Exception as e:
         fct_main.logs(e)
-def tab_param_update(police, taille, save):
+def tab_param_update(police, taille, save, langue):
     try:
-        conn = sqlite3.connect(var.dossier_projet + '/dbgene')
+        conn = sqlite3.connect(var.path_dossier + '/dbgene')
         cursor = conn.cursor()
-        cursor.execute("UPDATE param SET police = ?, taille = ?, save_time = ? WHERE id = '1'", (police, taille, save))
+        cursor.execute("UPDATE param SET police = ?, taille = ?, save_time = ?, langue = ? WHERE id = '1'", (police, taille, save, langue))
         conn.commit()
         conn.close()
     except Exception as e:
         print(e)
         fct_main.logs(e)
 def tab_param_lire(varia):
+    value = ""
     try:
-        conn = sqlite3.connect(var.dossier_projet + "/dbgene")
+        conn = sqlite3.connect(var.path_dossier + "/dbgene")
         cursor = conn.cursor()
         requete = "SELECT " + varia + " FROM param WHERE id = 1"
         cursor.execute(requete)
@@ -254,7 +311,7 @@ def tab_param_lire(varia):
         value = result[0]
     except Exception as e:
         print(e)
-        fct_main.logs(e)
+        #fct_main.logs(e)
     return value
 def tab_info_lire(varia):
     try:

@@ -46,20 +46,20 @@ def creer_bouton_haut():
     frame_boutons = tk.Frame(var.frame_haut, bg=var.bg_frame_haut)
     frame_boutons.pack(expand=True)
     if var.nom != "":
-        ttk.Button(frame_boutons, text="Résumé", command=lambda: sfenetre.fenetre_chapitre_tout(), width=10).pack(side="left", padx=2, pady=2)
-        ttk.Button(frame_boutons, text="Personnages", command=sfenetre.fenetre_perso, width=10).pack(side="left", padx=2, pady=2)
-        ttk.Button(frame_boutons, text="Lieux", command=sfenetre.fen_lieux_liste, width=10).pack(side="left", padx=2, pady=2)
+        ttk.Button(frame_boutons, text=_("Résumé"), command=lambda: sfenetre.fenetre_chapitre_tout(), width=10).pack(side="left", padx=2, pady=2)
+        ttk.Button(frame_boutons, text=_("Personnages"), command=sfenetre.fenetre_perso, width=10).pack(side="left", padx=2, pady=2)
+        ttk.Button(frame_boutons, text=_("Lieux"), command=sfenetre.fen_lieux_liste, width=10).pack(side="left", padx=2, pady=2)
     else:
-        ttk.Button(frame_boutons, text="Nouveau projet", command=fct_main.projet_new, width=15).pack(side="left", padx=2, pady=2)
-        ttk.Button(frame_boutons, text="Ouvrir projet", command=fct_main.open_projet, width=15).pack(side="left", padx=2, pady=2)
+        ttk.Button(frame_boutons, text=_("Nouveau projet"), command=fct_main.projet_new, width=15).pack(side="left", padx=2, pady=2)
+        ttk.Button(frame_boutons, text=_("Ouvrir projet"), command=fct_main.open_projet, width=15).pack(side="left", padx=2, pady=2)
 
 def creer_list_chapitre(frame1):
     list_chapitre = ttk.Treeview(frame1, height=10, columns=("ID", "Numero", "Nom"), show="headings")
 
     # Configuration des en-têtes
-    list_chapitre.heading("ID", text="ID")
-    list_chapitre.heading("Numero", text="Numéro")
-    list_chapitre.heading("Nom", text="Nom")
+    list_chapitre.heading("ID", text=_("ID"))
+    list_chapitre.heading("Numero", text=_("Numéro"))
+    list_chapitre.heading("Nom", text=_("Nom"))
 
     # Configuration des colonnes
     list_chapitre.column("ID", width=0, stretch=tk.NO)
@@ -79,13 +79,13 @@ def creer_toolbar(parent):
     return toolbar
 
 def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl, corrige):
-    bold_button = ttk.Button(toolbar, text="Gras", command=toggle_bold)
+    bold_button = ttk.Button(toolbar, text=_("Gras"), command=toggle_bold)
     bold_button.pack(side="left", padx=2, pady=2)
-    italic_button = ttk.Button(toolbar, text="Italique", command=toggle_italic)
+    italic_button = ttk.Button(toolbar, text=_("Italique"), command=toggle_italic)
     italic_button.pack(side="left", padx=2, pady=2)
-    sl_button = ttk.Button(toolbar, text="Sousligné", command=toggle_sl)
+    sl_button = ttk.Button(toolbar, text=_("Sousligné"), command=toggle_sl)
     sl_button.pack(side="left", padx=2, pady=2)
-    corrige_button = ttk.Button(toolbar, text="Corriger", command=corrige)
+    corrige_button = ttk.Button(toolbar, text=_("Corriger"), command=corrige)
     corrige_button.pack(side="left", padx=2, pady=2)
     return bold_button, italic_button, sl_button, corrige
 
@@ -151,29 +151,28 @@ def projet_save():
 def create_menu():
     menubar = tk.Menu()
     menu1 = tk.Menu(menubar, tearoff=0)
-    menu1.add_command(label="Nouveau projet", command=projet_new)
-    menu1.add_command(label="Ouvrir un Projet", command=projet_open)
-    menu1.add_command(label="Fermer le projet", command=lambda: fct_main.close_projet())
-    menu1.add_command(label="Sauvegarder  ctrl+s", command=rac_s)
-    menubar.add_cascade(label="Fichier", menu=menu1)
+    menu1.add_command(label=_("Nouveau projet"), command=projet_new)
+    menu1.add_command(label=_("Ouvrir un Projet"), command=projet_open)
+    menu1.add_command(label=_("Fermer le projet"), command=lambda: fct_main.close_projet())
+    menu1.add_command(label=_("Sauvegarder  ctrl+s"), command=rac_s)
+    menubar.add_cascade(label=_("Fichier"), menu=menu1)
 
     menu2 = tk.Menu(menubar, tearoff=0)
-    menu2.add_command(label="Général", command=lambda: sfenetre.ouvrir_fenetre_parametres_edition())
-    menu2.add_command(label="Informations", command=lambda: sfenetre.ouvrir_fenetre_parametres_information())
-    if var.dossier_projet != "":
-        menubar.add_cascade(label="Paramètres", menu=menu2)
+    menu2.add_command(label=_("Général"), command=lambda: sfenetre.ouvrir_fenetre_parametres_edition())
+    menu2.add_command(label=_("Informations"), command=lambda: sfenetre.ouvrir_fenetre_parametres_information())
+    menubar.add_cascade(label=_("Paramètres"), menu=menu2)
 
     menu3 = tk.Menu(menubar, tearoff=0)
-    menu3.add_command(label="PDF", command=lambda : export_pdf.export())
-    menu3.add_command(label="Docx", command=lambda: export_docx.exporter_textes_vers_docx())
-    menu3.add_command(label="Epub", command=lambda: export_epub.exporter_textes_vers_epub())
+    menu3.add_command(label=_("PDF"), command=lambda : export_pdf.export())
+    menu3.add_command(label=_("Docx"), command=lambda: export_docx.exporter_textes_vers_docx())
+    menu3.add_command(label=_("Epub"), command=lambda: export_epub.exporter_textes_vers_epub())
     if var.dossier_projet != "":
-        menubar.add_cascade(label="Export", menu=menu3)
+        menubar.add_cascade(label=_("Export"), menu=menu3)
 
     menu4 = tk.Menu(menubar, tearoff=0)
-    menu4.add_command(label="Readme", command=lambda: webbrowser.open('https://github.com/Dynag1/ScryBook/blob/master/README.md'))
-    menu4.add_command(label="Changelog", command=lambda: webbrowser.open('https://github.com/Dynag1/ScryBook/blob/master/Changelog.md'))
-    menu4.add_command(label="Site internet", command=lambda: webbrowser.open('https://prog.dynag.co'))
+    menu4.add_command(label=_("Readme"), command=lambda: webbrowser.open('https://github.com/Dynag1/ScryBook/blob/master/README.md'))
+    menu4.add_command(label=_("Changelog"), command=lambda: webbrowser.open('https://github.com/Dynag1/ScryBook/blob/master/Changelog.md'))
+    menu4.add_command(label=_("Site internet"), command=lambda: webbrowser.open('https://prog.dynag.co'))
     menubar.add_cascade(label="?", menu=menu4)
 
     menubar.bind_all('<Control-s>', rac_s)
@@ -181,7 +180,7 @@ def create_menu():
     return menubar
 
 def creer_label_version(frame_bas):
-    lab_version = tk.Label(master=frame_bas, bg=var.bg_frame_haut, text="ScryBook version :" + var.version)
+    lab_version = tk.Label(master=frame_bas, bg=var.bg_frame_haut, text=_("ScryBook version :") + var.version)
     lab_version.grid(row=0, column=1, padx=5, pady=5)
     return lab_version
 

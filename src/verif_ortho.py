@@ -44,6 +44,12 @@ class CorrectionOrthographique:
                 if len(parties_mot) == 2 and parties_mot[0].lower() in ["l", "d", "j", "m", "n", "t", "s", "c", "qu"]:
                     continue
 
+            # Traitement spécial pour les mots composés avec des tirets
+            if '-' in mot:
+                parties_mot = mot.split('-')
+                if all(not self.spell.unknown([partie]) for partie in parties_mot):
+                    continue
+
             if self.spell.unknown([mot]):
                 debut = f"1.0+{match.start()}c"
                 fin = f"1.0+{match.end()}c"
@@ -72,7 +78,7 @@ class CorrectionOrthographique:
                         self.menu_correction.add_command(label=correction,
                                                          command=lambda c=correction: self.appliquer_correction(index, mot, c))
                     self.menu_correction.add_separator()
-                    self.menu_correction.add_command(label="Ignorer ce mot",
+                    self.menu_correction.add_command(label=_("Ignorer ce mot"),
                                                      command=lambda: self.ajouter_mot_a_ignorer(mot))
                     self.menu_correction.post(event.x_root, event.y_root)
 

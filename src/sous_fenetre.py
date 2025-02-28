@@ -13,7 +13,7 @@ def fenetre_chapitre():
     bg_color = var.bg_frame_mid
 
     sous_fenetre = tk.Toplevel()
-    sous_fenetre.title("Ajouter un chapitre")
+    sous_fenetre.title(_("Ajouter un chapitre"))
     sous_fenetre.geometry("680x520")
     sous_fenetre.iconbitmap('src/logoSb.ico')
     sous_fenetre.configure(bg=bg_color)
@@ -27,22 +27,22 @@ def fenetre_chapitre():
     frame.pack(fill=tk.BOTH, expand=True)
 
     # Numéro
-    ttk.Label(frame, text="Numéro:").grid(row=0, column=0, sticky=tk.W, pady=5, padx=5)
+    ttk.Label(frame, text=_("Numéro:")).grid(row=0, column=0, sticky=tk.W, pady=5, padx=5)
     input_numero = ttk.Entry(frame)
     input_numero.grid(row=0, column=1, sticky=tk.EW, pady=5, padx=5)
 
     # Nom
-    ttk.Label(frame, text="Nom:").grid(row=0, column=2, sticky=tk.W, pady=5, padx=5)
+    ttk.Label(frame, text=_("Nom:")).grid(row=0, column=2, sticky=tk.W, pady=5, padx=5)
     input_nom = ttk.Entry(frame)
     input_nom.grid(row=0, column=3, sticky=tk.EW, pady=5, padx=5)
 
     # Résumé
-    ttk.Label(frame, text="Résumé:").grid(row=1, column=0, columnspan=4, sticky=tk.W, pady=5, padx=5)
+    ttk.Label(frame, text=_("Résumé:")).grid(row=1, column=0, columnspan=4, sticky=tk.W, pady=5, padx=5)
     text_widget = tk.Text(frame, wrap="word", undo=True, height=20)
     text_widget.grid(row=2, column=0, columnspan=4, sticky=tk.NSEW, pady=5, padx=5)
 
     # Bouton de validation
-    ttk.Button(frame, text="Valider",
+    ttk.Button(frame, text=_("Valider"),
                command=lambda: valider_nom_chapitre(input_nom, text_widget, input_numero, sous_fenetre)).grid(
         row=3, column=0, columnspan=4, pady=10)
 
@@ -67,7 +67,7 @@ def fenetre_chapitre_resume(id):
     bg_color = var.bg_frame_mid
 
     sous_fenetre = tk.Toplevel()
-    sous_fenetre.title("Résumé")
+    sous_fenetre.title(_("Résumé"))
     sous_fenetre.geometry("680x520")
     sous_fenetre.iconbitmap('src/logoSb.ico')
     sous_fenetre.configure(bg=bg_color)
@@ -85,19 +85,19 @@ def fenetre_chapitre_resume(id):
     numero = db.lire("chapitre", id, "numero")
 
     # Numéro
-    ttk.Label(frame, text="Numéro:").grid(row=0, column=0, sticky=tk.W, pady=5, padx=5)
+    ttk.Label(frame, text=_("Numéro:")).grid(row=0, column=0, sticky=tk.W, pady=5, padx=5)
     input_numero = ttk.Entry(frame)
     input_numero.grid(row=0, column=1, sticky=tk.EW, pady=5, padx=5)
     input_numero.insert(0, numero)
 
     # Nom
-    ttk.Label(frame, text="Nom:").grid(row=0, column=2, sticky=tk.W, pady=5, padx=5)
+    ttk.Label(frame, text=_("Nom:")).grid(row=0, column=2, sticky=tk.W, pady=5, padx=5)
     input_nom = ttk.Entry(frame)
     input_nom.grid(row=0, column=3, sticky=tk.EW, pady=5, padx=5)
     input_nom.insert(0, nom)
 
     # Résumé
-    ttk.Label(frame, text="Résumé:").grid(row=1, column=0, columnspan=4, sticky=tk.W, pady=5, padx=5)
+    ttk.Label(frame, text=_("Résumé:")).grid(row=1, column=0, columnspan=4, sticky=tk.W, pady=5, padx=5)
     text_widget = tk.Text(frame, wrap="word", undo=True, height=20)
     text_widget.grid(row=2, column=0, columnspan=4, sticky=tk.NSEW, pady=5, padx=5)
     text_widget.delete('1.0', tk.END)
@@ -106,7 +106,7 @@ def fenetre_chapitre_resume(id):
     text_widget.see(tk.INSERT)
 
     # Bouton de validation
-    ttk.Button(frame, text="Mettre à jour",
+    ttk.Button(frame, text=_("Mettre à jour"),
                command=lambda: update_nom_chapitre(input_nom.get(), text_widget.get("1.0", tk.END), input_numero.get(),
                                                    id, sous_fenetre)).grid(
         row=3, column=0, columnspan=4, pady=10)
@@ -129,7 +129,7 @@ def fenetre_chapitre_tout():
     bg_color = var.bg_frame_mid
 
     fenetre = tk.Toplevel()
-    fenetre.title("Liste des chapitres")
+    fenetre.title(_("Liste des chapitres"))
     fenetre.geometry("800x600")
     fenetre.configure(bg=bg_color)
 
@@ -185,7 +185,7 @@ def fenetre_chapitre_tout():
 ##### Fenetre liste persos
 def fenetre_perso():
     sous_fenetre = tk.Toplevel()
-    sous_fenetre.title("Personnages")
+    sous_fenetre.title(_("Personnages"))
     sous_fenetre.geometry("600x500")
     sous_fenetre.iconbitmap('src/logoSb.ico')
 
@@ -202,7 +202,7 @@ def fenetre_perso():
     button_frame.columnconfigure(0, weight=1)
 
     # Créer et configurer le Treeview
-    listperso = ttk.Treeview(frame, columns=("ID", "Alias", "Nom", "Prenom", "Sexe"), show="headings")
+    listperso = ttk.Treeview(frame, columns=("ID", _("Alias"), _("Nom"), _("Prenom"), _("Sexe")), show="headings")
     for col, width in zip(listperso["columns"], [50, 100, 150, 150, 50]):
         listperso.column(col, width=width, stretch=tk.YES if col != "ID" else tk.NO)
         listperso.heading(col, text=col, command=lambda _col=col: treeview_sort_column(listperso, _col, False))
@@ -243,7 +243,7 @@ def fenetre_perso():
     def ouvrir_personnage():
         selection = listperso.selection()
         if not selection:
-            messagebox.showwarning("Avertissement", "Veuillez sélectionner un personnage.")
+            messagebox.showwarning(_("Avertissement"), _("Veuillez sélectionner un personnage."))
             return
 
         personnage_id = listperso.item(selection[0])['values'][0]
@@ -253,12 +253,12 @@ def fenetre_perso():
     def supprimer_personnage():
         selection = listperso.selection()
         if not selection:
-            messagebox.showwarning("Avertissement", "Veuillez sélectionner un personnage à supprimer.")
+            messagebox.showwarning(_("Avertissement"), _("Veuillez sélectionner un personnage."))
             return
 
         personnage_id = listperso.item(selection[0])['values'][0]
 
-        if messagebox.askyesno("Confirmation", "Êtes-vous sûr de vouloir supprimer ce personnage ?"):
+        if messagebox.askyesno(_("Confirmation"), _("Êtes-vous sûr de vouloir supprimer ce personnage ?")):
             try:
                 with sqlite3.connect(var.dossier_projet + '/dbgene') as conn:
                     cursor = conn.cursor()
@@ -266,9 +266,9 @@ def fenetre_perso():
                     conn.commit()
 
                 remplir_treeview()
-                messagebox.showinfo("Succès", "Le personnage a été supprimé avec succès.")
+                messagebox.showinfo(_("Succès"), _("Le personnage a été supprimé avec succès."))
             except sqlite3.Error as e:
-                messagebox.showerror("Erreur de base de données", f"Impossible de supprimer le personnage : {e}")
+                messagebox.showerror(_("Erreur de base de données"), f_("Impossible de supprimer le personnage : {e}"))
 
     def treeview_sort_column(tv, col, reverse):
         l = [(tv.set(k, col), k) for k in tv.get_children('')]
@@ -278,10 +278,10 @@ def fenetre_perso():
         tv.heading(col, command=lambda: treeview_sort_column(tv, col, not reverse))
 
     # Boutons
-    ttk.Button(button_frame, text="Nouveau personnage", command=nouveau_personnage).pack(side=tk.LEFT, padx=(0, 5))
-    ttk.Button(button_frame, text="Ouvrir", command=ouvrir_personnage).pack(side=tk.LEFT)
-    ttk.Button(button_frame, text="Supprimer", command=supprimer_personnage).pack(side=tk.LEFT, padx=(5, 0))
-    ttk.Button(button_frame, text="Rafraîchir", command=remplir_treeview).pack(side=tk.LEFT, padx=(5, 0))
+    ttk.Button(button_frame, text=_("Nouveau personnage"), command=nouveau_personnage).pack(side=tk.LEFT, padx=(0, 5))
+    ttk.Button(button_frame, text=_("Ouvrir"), command=ouvrir_personnage).pack(side=tk.LEFT)
+    ttk.Button(button_frame, text=_("Supprimer"), command=supprimer_personnage).pack(side=tk.LEFT, padx=(5, 0))
+    ttk.Button(button_frame, text=_("Rafraîchir"), command=remplir_treeview).pack(side=tk.LEFT, padx=(5, 0))
 
     # Binding pour double-clic
     listperso.bind('<Double-1>', lambda e: ouvrir_personnage())
@@ -296,7 +296,7 @@ def fen_perso(id):
     bg_color = var.bg_frame_mid  # Utilisation de la couleur de fond définie dans var
 
     sous_fenetre = tk.Toplevel()
-    sous_fenetre.title("Détails du Personnage")
+    sous_fenetre.title(_("Détails du Personnage"))
     sous_fenetre.geometry("500x600")
     sous_fenetre.configure(bg=bg_color)
 
@@ -315,8 +315,8 @@ def fen_perso(id):
     center_frame.pack(expand=True)
 
     # Ajouter les boutons au sous-frame centré
-    ttk.Button(center_frame, text="Sauvegarder", command=lambda: sauvegarder()).pack(side="left", padx=5)
-    ttk.Button(center_frame, text="Annuler", command=lambda: annule()).pack(side="left", padx=5)
+    ttk.Button(center_frame, text=_("Sauvegarder"), command=lambda: sauvegarder()).pack(side="left", padx=5)
+    ttk.Button(center_frame, text=_("Annuler"), command=lambda: annule()).pack(side="left", padx=5)
 
     main_frame = ttk.Frame(sous_fenetre, style="Custom.TFrame")
     main_frame.pack(fill=tk.BOTH, expand=True)
@@ -341,14 +341,14 @@ def fen_perso(id):
         scrollable_frame.grid_columnconfigure(1, weight=1)
         return widget
 
-    alias = creer_champ("Alias:", 0)
-    nom = creer_champ("Nom:", 1)
-    prenom = creer_champ("Prénom:", 2)
-    sexe = creer_champ("Sexe:", 3)
-    age = creer_champ("Âge:", 4)
-    desc_phys = creer_champ("Description physique:", 5, widget_type=lambda parent: tk.Text(parent, height=4, wrap=tk.WORD))
-    desc_glob = creer_champ("Description globale:", 6, widget_type=lambda parent: tk.Text(parent, height=4, wrap=tk.WORD))
-    skill = creer_champ("Compétences:", 7, widget_type=lambda parent: tk.Text(parent, height=4, wrap=tk.WORD))
+    alias = creer_champ(_("Alias:"), 0)
+    nom = creer_champ(_("Nom:"), 1)
+    prenom = creer_champ(_("Prénom:"), 2)
+    sexe = creer_champ(_("Sexe:"), 3)
+    age = creer_champ(_("Âge:"), 4)
+    desc_phys = creer_champ(_("Description physique:"), 5, widget_type=lambda parent: tk.Text(parent, height=4, wrap=tk.WORD))
+    desc_glob = creer_champ(_("Description globale:"), 6, widget_type=lambda parent: tk.Text(parent, height=4, wrap=tk.WORD))
+    skill = creer_champ(_("Compétences:"), 7, widget_type=lambda parent: tk.Text(parent, height=4, wrap=tk.WORD))
 
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
@@ -428,7 +428,7 @@ def fen_perso(id):
 #################################################
 def fen_lieux_liste():
     sous_fenetre = tk.Toplevel()
-    sous_fenetre.title("Lieux")
+    sous_fenetre.title(_("Lieux"))
     sous_fenetre.geometry("600x500")
     sous_fenetre.iconbitmap('src/logoSb.ico')
 
@@ -445,7 +445,7 @@ def fen_lieux_liste():
     button_frame.columnconfigure(0, weight=1)
 
     # Créer et configurer le Treeview
-    listperso = ttk.Treeview(frame, columns=("ID", "Nom", "Description", "Tag"), show="headings")
+    listperso = ttk.Treeview(frame, columns=(_("ID"), _("Nom"), _("Description"), _("Tag")), show="headings")
     for col, width in zip(listperso["columns"], [50, 100, 150, 150]):
         listperso.column(col, width=width, stretch=tk.YES if col != "ID" else tk.NO)
         listperso.heading(col, text=col, command=lambda _col=col: treeview_sort_column(listperso, _col, False))
@@ -487,7 +487,7 @@ def fen_lieux_liste():
     def ouvrir_personnage():
         selection = listperso.selection()
         if not selection:
-            messagebox.showwarning("Avertissement", "Veuillez sélectionner un personnage.")
+            messagebox.showwarning(_("Avertissement"), _("Veuillez sélectionner un Lieu."))
             return
 
         personnage_id = listperso.item(selection[0])['values'][0]
@@ -497,12 +497,12 @@ def fen_lieux_liste():
     def supprimer_personnage():
         selection = listperso.selection()
         if not selection:
-            messagebox.showwarning("Avertissement", "Veuillez sélectionner un lieu à supprimer.")
+            messagebox.showwarning(_("Avertissement"), _("Veuillez sélectionner un Lieu."))
             return
 
         personnage_id = listperso.item(selection[0])['values'][0]
 
-        if messagebox.askyesno("Confirmation", "Êtes-vous sûr de vouloir supprimer ce lieu ?"):
+        if messagebox.askyesno(_("Confirmation"), _("Êtes-vous sûr de vouloir supprimer ce lieu ?")):
             try:
                 with sqlite3.connect(var.dossier_projet + '/dbgene') as conn:
                     cursor = conn.cursor()
@@ -510,9 +510,9 @@ def fen_lieux_liste():
                     conn.commit()
 
                 remplir_treeview()
-                messagebox.showinfo("Succès", "Le lieu a été supprimé avec succès.")
+                messagebox.showinfo(_("Succès"), _("Le lieu a été supprimé avec succès."))
             except sqlite3.Error as e:
-                messagebox.showerror("Erreur de base de données", f"Impossible de supprimer le personnage : {e}")
+                messagebox.showerror(_("Erreur de base de données"), f_("Impossible de supprimer le personnage : {e}"))
 
     def treeview_sort_column(tv, col, reverse):
         l = [(tv.set(k, col), k) for k in tv.get_children('')]
@@ -522,10 +522,10 @@ def fen_lieux_liste():
         tv.heading(col, command=lambda: treeview_sort_column(tv, col, not reverse))
 
     # Boutons
-    ttk.Button(button_frame, text="Nouveau lieu", command=nouveau_personnage).pack(side=tk.LEFT, padx=(0, 5))
-    ttk.Button(button_frame, text="Ouvrir", command=ouvrir_personnage).pack(side=tk.LEFT)
-    ttk.Button(button_frame, text="Supprimer", command=supprimer_personnage).pack(side=tk.LEFT, padx=(5, 0))
-    ttk.Button(button_frame, text="Rafraîchir", command=remplir_treeview).pack(side=tk.LEFT, padx=(5, 0))
+    ttk.Button(button_frame, text=_("Nouveau lieu"), command=nouveau_personnage).pack(side=tk.LEFT, padx=(0, 5))
+    ttk.Button(button_frame, text=_("Ouvrir"), command=ouvrir_personnage).pack(side=tk.LEFT)
+    ttk.Button(button_frame, text=_("Supprimer"), command=supprimer_personnage).pack(side=tk.LEFT, padx=(5, 0))
+    ttk.Button(button_frame, text=_("Rafraîchir"), command=remplir_treeview).pack(side=tk.LEFT, padx=(5, 0))
 
     # Binding pour double-clic
     listperso.bind('<Double-1>', lambda e: ouvrir_personnage())
@@ -540,7 +540,7 @@ def fen_lieux(id):
     bg_color = var.bg_frame_mid
 
     sous_fenetre = tk.Toplevel()
-    sous_fenetre.title("Détails du lieu")
+    sous_fenetre.title(_("Détails du lieu"))
     sous_fenetre.geometry("500x500")
     sous_fenetre.configure(bg=bg_color)
 
@@ -558,8 +558,8 @@ def fen_lieux(id):
     center_frame.pack(expand=True)
 
     # Ajouter les boutons au sous-frame centré
-    ttk.Button(center_frame, text="Sauvegarder", command=lambda: sauvegarder()).pack(side="left", padx=5)
-    ttk.Button(center_frame, text="Annuler", command=lambda: annule()).pack(side="left", padx=5)
+    ttk.Button(center_frame, text=_("Sauvegarder"), command=lambda: sauvegarder()).pack(side="left", padx=5)
+    ttk.Button(center_frame, text=_("Annuler"), command=lambda: annule()).pack(side="left", padx=5)
 
     main_frame = ttk.Frame(sous_fenetre, style="Custom.TFrame")
     main_frame.pack(fill=tk.BOTH, expand=True)
@@ -584,8 +584,8 @@ def fen_lieux(id):
         scrollable_frame.grid_columnconfigure(1, weight=1)
         return widget
 
-    nom = creer_champ("Nom:", 0)
-    desc = creer_champ("Description:", 1, widget_type=lambda parent: tk.Text(parent, height=20, wrap=tk.WORD))
+    nom = creer_champ(_("Nom:"), 0)
+    desc = creer_champ(_("Description:"), 1, widget_type=lambda parent: tk.Text(parent, height=20, wrap=tk.WORD))
 
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
@@ -654,51 +654,64 @@ def fen_lieux(id):
 ##### Parametres Police
 def ouvrir_fenetre_parametres_edition():
     fenetre_param = tk.Toplevel()
-    fenetre_param.title("Paramètres")
-    fenetre_param.geometry("300x300")
+    fenetre_param.title(_("Paramètres"))
+    fenetre_param.geometry("300x350")  # Augmenté la hauteur pour accommoder le nouveau champ
 
     # Récupérer la liste des polices système
     polices_systeme = list(font.families())
     polices_systeme.sort()
 
-    # Récupérer les valeurs actuelles de la police et de la taille depuis la base de données
-    conn = sqlite3.connect(var.dossier_projet + "/dbgene")
+    # Récupérer les valeurs actuelles depuis la base de données
+    conn = sqlite3.connect(var.path_dossier + "/dbgene")
     cursor = conn.cursor()
-    cursor.execute("SELECT police, taille, save_time FROM param WHERE id = 1")
+    cursor.execute("SELECT police, taille, save_time, langue FROM param WHERE id = 1")
     result = cursor.fetchone()
-    police_actuelle, taille_actuelle, save_time_actuelle = result if result else ('', '12', "30")
+    police_actuelle, taille_actuelle, save_time_actuelle, langue_actuelle = result if result else ('', '12', "30", "en")
     conn.close()
 
     # Sélection de la police
-    tk.Label(fenetre_param, text="Police :").pack(pady=5)
+    tk.Label(fenetre_param, text=_("Police :")).pack(pady=5)
     var_police = tk.StringVar(value=police_actuelle)
     combo_police = ttk.Combobox(fenetre_param, textvariable=var_police, values=polices_systeme)
     combo_police.pack(pady=5)
 
     # Sélection de la taille
-    tk.Label(fenetre_param, text="Taille :").pack(pady=5)
+    tk.Label(fenetre_param, text=_("Taille :")).pack(pady=5)
     tailles = list(range(10, 21))
     var_taille = tk.StringVar(value=taille_actuelle)
     combo_taille = ttk.Combobox(fenetre_param, textvariable=var_taille, values=tailles)
     combo_taille.pack(pady=5)
 
     # Sélection du délais d'enregistrement auto
-    tk.Label(fenetre_param, text="Sauvegarde auto (s) :").pack(pady=5)
-    save_time = list(range(0, 121, 10))  # Crée une liste de 10 à 120 par pas de 10
-    var_save_time = tk.StringVar(value=save_time_actuelle)  # Initialise avec la première valeur
+    tk.Label(fenetre_param, text=_("Sauvegarde auto (s) :")).pack(pady=5)
+    save_time = list(range(0, 121, 10))
+    var_save_time = tk.StringVar(value=save_time_actuelle)
     combo_save_time = ttk.Combobox(fenetre_param, textvariable=var_save_time, values=save_time)
     combo_save_time.pack(pady=5)
+
+    # Sélection de la langue
+    tk.Label(fenetre_param, text=_("Langue :")).pack(pady=5)
+    langues = ["fr", "en"]  # Ajoutez d'autres codes de langue selon vos besoins
+    var_langue = tk.StringVar(value=langue_actuelle)
+    combo_langue = ttk.Combobox(fenetre_param, textvariable=var_langue, values=langues)
+    combo_langue.pack(pady=5)
+
+    # Ajoutez ici le code pour le bouton de sauvegarde et la gestion de la sauvegarde des paramètres
+
 
     # Bouton Sauvegarder
     def sauvegarder():
         var.param_police = var_police.get()
         var.param_taille = var_taille.get()
         var.save_time = var_save_time.get()
-        db.tab_param_update(var_police.get(), var_taille.get(), var_save_time.get())
+        var.save_langue = combo_langue.get()
+        db.tab_param_update(var_police.get(), var_taille.get(), var_save_time.get(), combo_langue.get())
 
         fenetre_param.destroy()
+        var.app_instance.reload_all()
 
-    tk.Button(fenetre_param, text="Sauvegarder", command=sauvegarder).pack(pady=10)
+
+    tk.Button(fenetre_param, text=_("Sauvegarder"), command=sauvegarder).pack(pady=10)
 
     # Modifier la taille de la police pour les listes déroulantes
     style = ttk.Style()
@@ -709,7 +722,7 @@ def ouvrir_fenetre_parametres_edition():
 ##### Fenetre informations
 def ouvrir_fenetre_parametres_information():
     sous_fenetre = tk.Toplevel()
-    sous_fenetre.title("Informations")
+    sous_fenetre.title(_("Informations"))
     sous_fenetre.geometry("500x400")
 
     style = ttk.Style()
@@ -744,11 +757,11 @@ def ouvrir_fenetre_parametres_information():
         scrollable_frame.grid_columnconfigure(1, weight=1)
         return widget
 
-    titre = creer_champ("Titre:", 0)
-    sous_titre = creer_champ("Sous Titre:", 1)
-    auteur = creer_champ("Auteur:", 2)
-    date = creer_champ("Date:", 3)
-    resume = creer_champ("Résumé:", 4, widget_type=lambda parent: tk.Text(parent, height=4, wrap=tk.WORD))
+    titre = creer_champ(_("Titre:"), 0)
+    sous_titre = creer_champ(_("Sous Titre:"), 1)
+    auteur = creer_champ(_("Auteur:"), 2)
+    date = creer_champ(_("Date:"), 3)
+    resume = creer_champ(_("Résumé:"), 4, widget_type=lambda parent: tk.Text(parent, height=4, wrap=tk.WORD))
 
     canvas.pack(side="left", fill="both", expand=True)
 
@@ -780,7 +793,7 @@ def ouvrir_fenetre_parametres_information():
     button_frame = ttk.Frame(sous_fenetre, style="Custom.TFrame")
     button_frame.pack(side="bottom", fill="x", padx=10, pady=10)
 
-    save_button = ttk.Button(button_frame, text="Sauvegarder", command=sauvegarder)
+    save_button = ttk.Button(button_frame, text=_("Sauvegarder"), command=sauvegarder)
     save_button.pack(expand=True)
 
     def get_perso_data():

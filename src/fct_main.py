@@ -44,7 +44,7 @@ def projet_new():
         chemin_dossier, nom_fichier_complet = os.path.split(chemin_fichier)
         nom_fichier = os.path.splitext(nom_fichier_complet)[0]
         if os.path.exists(chemin_fichier):
-            alert("Le projet existe déjà")
+            alert(_("Le projet existe déjà"))
         else:
             with open(chemin_fichier, 'w', encoding='utf-8') as fichier:
                 fichier.write(f"path = {chemin_dossier}\n"
@@ -57,17 +57,17 @@ def projet_new():
                     print(f"Erreur lors de la création du dossier : {e}")
             db.creer_table_chapitre(chemin_dossier+"/"+nom_fichier+"/")
             db.creer_table_gene(chemin_dossier+"/"+nom_fichier+"/")
-            alert("Le projet "+nom_fichier+" à bien été crée")
+            alert(_("Le projet "+nom_fichier+" à bien été crée"))
             open_projet()
     else:
-        alert("Opération annulée.")
+        alert(_("Opération annulée."))
 ##### Ouvrir un projet #####
 def open_projet():
     if var.dossier_projet != "":
         close_projet()
     chemin_fichier = filedialog.askopenfilename(
-        title="Sélectionner un fichier .sb",
-        filetypes=[("Fichiers SB", "*.sb"), ("Tous les fichiers", "*.*")]
+        title=_("Sélectionner un fichier .sb"),
+        filetypes=[(_("Fichiers SB"), "*.sb"), (_("Tous les fichiers"), "*.*")]
     )
     if chemin_fichier:
         variables = {}
@@ -230,18 +230,19 @@ def ouvrir_chapitre(id):
         var.app_instance.txt_resume.insert(1.0, resume)
 
 
+
     except Exception as e:
-        tk.messagebox.showerror("Erreur", f"Impossible d'ouvrir le fichier : {str(e)}")
+        tk.messagebox.showerror(_("Erreur"), f_("Impossible d'ouvrir le fichier : {str(e)}"))
 ##### Supprimer le chapite #####
 def delete_chapitre(id, chapitre):
     chemin_fichier = var.dossier_projet+"/"+id
     try:
         os.remove(chemin_fichier)
-        print(f"Le fichier '{chemin_fichier}' a été supprimé avec succès.")
+        print(f_("Le fichier '{chemin_fichier}' a été supprimé avec succès."))
     except FileNotFoundError:
-        print(f"Le fichier '{chemin_fichier}' n'existe pas.")
+        print(f_("Le fichier '{chemin_fichier}' n'existe pas."))
     except PermissionError:
-        print(f"Pas de permission pour supprimer le fichier '{chemin_fichier}'.")
+        print(f_("Pas de permission pour supprimer le fichier '{chemin_fichier}'."))
     except Exception as e:
         print(f"Une erreur s'est produite lors de la suppression du fichier : {str(e)}")
     db.effacer(id, "chapitre")

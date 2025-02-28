@@ -152,11 +152,11 @@ def create_pdf(input_files, output_file, title, subtitle, author, resume):
         doc.multiBuild(elements, onFirstPage=title_page, canvasmaker=NumberedCanvas)
         return True
     except PermissionError:
-        messagebox.showerror("Erreur",
-                             "Impossible d'enregistrer le fichier PDF. Vérifiez que vous avez les permissions nécessaires et que le fichier n'est pas ouvert dans un autre programme.")
+        messagebox.showerror(_("Erreur"),
+                             _("Impossible d'enregistrer le fichier PDF. Vérifiez que vous avez les permissions nécessaires et que le fichier n'est pas ouvert dans un autre programme."))
         return False
     except Exception as e:
-        messagebox.showerror("Erreur", f"Une erreur s'est produite lors de la création du PDF : {str(e)}")
+        messagebox.showerror(_("Erreur"), f_("Une erreur s'est produite lors de la création du PDF : {str(e)}"))
         return False
 
 
@@ -174,7 +174,7 @@ def select_files_and_create_pdf():
     input_files = get_file_paths_and_titles_from_database()
 
     if not input_files:
-        messagebox.showwarning("Attention", "Aucun fichier trouvé dans la base de données.")
+        messagebox.showwarning(_("Attention"), _("Aucun fichier trouvé dans la base de données."))
         return
 
     # Sélectionner l'emplacement et le nom du fichier PDF de sortie
@@ -198,9 +198,9 @@ def select_files_and_create_pdf():
 
     # Créer le PDF
     if create_pdf(input_files, output_file, title, subtitle, author, resume):
-        messagebox.showinfo("Succès", f"Le fichier PDF a été créé : {output_file}")
+        messagebox.showinfo(_("Succès"), f_("Le fichier PDF a été créé : {output_file}"))
     else:
-        messagebox.showerror("Erreur", "La création du fichier PDF a échoué.")
+        messagebox.showerror(_("Erreur", "La création du fichier PDF a échoué."))
 
 
 def export():

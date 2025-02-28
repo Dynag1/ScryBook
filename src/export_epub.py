@@ -121,9 +121,9 @@ def exporter_textes_vers_epub():
 
     try:
         epub.write_epub(fichier_sortie, livre, {})
-        fct_main.alert(f"Le fichier DOCX a été enregistré sous : {fichier_sortie}")
+        fct_main.alert(f_("Le fichier DOCX a été enregistré sous : {fichier_sortie}"))
     except Exception as e:
-        fct_main.alert(f"Une erreur est survenue : {e}")
+        fct_main.alert(f_("Une erreur est survenue : {e}"))
 
     # Fermer la connexion à la base de données
     conn.close()

@@ -49,8 +49,8 @@ def testVersion():
     current_version = ''.join(var.version.split('.'))
 
     if int(current_version) < int(version):
-        val = design.question_box('Mise à jour',
-                                  f'Une mise à jour vers la version {version} est disponible. \n Voulez vous la télécharger ?')
+        val = design.question_box(_('Mise à jour'),
+                                  f_('Une mise à jour vers la version {version} est disponible. \n Voulez vous la télécharger ?'))
         if val:
             webbrowser.open(var.site + '/ScryBook/ScryBook_Setup.exe')
             os._exit(0)

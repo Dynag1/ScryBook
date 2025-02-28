@@ -3,12 +3,13 @@ import threading
 import tkinter as tk
 from tkinter import ttk, Menu
 import tkinter.font as tkFont
-from src import var, design, fct_main, sous_fenetre, thread_maj, verif_ortho
+from src import var, design, fct_main, sous_fenetre, thread_maj, verif_ortho, db
 from textblob import TextBlob
 from src.verif_ortho import CorrectionOrthographique
 from spellchecker import SpellChecker
 import re
-
+import gettext
+import locale
 global app_instance
 app_instance = None
 def quitter():
@@ -17,6 +18,20 @@ def quitter():
 class main:
 
     def __init__(self, master):
+        chemin_repertoire = os.getcwd()
+        var.path_dossier = chemin_repertoire
+        db.creer_table_param()
+        try:
+            # Obtenir la langue du système
+
+            var.langue = db.tab_param_lire("langue")
+            gettext.find("ScryBook")
+            traduction = gettext.translation(var.langue, localedir='src/locale', languages=[var.langue])
+            traduction.install()
+            print(traduction)
+        except:
+            gettext.install('ScryBook')
+            print("error")
         global app_instance
         self.master = master
         var.app_instance = self
@@ -39,7 +54,7 @@ class main:
         self.frame1.columnconfigure(0, weight=1)
 
         design.creer_bouton_haut()
-        self.but_chapitre = ttk.Button(self.frame1, text="Nouveau chapitre", command=fct_main.nouveau_chapitre).grid(row=2, column=0, padx=5, pady=5)
+        self.but_chapitre = ttk.Button(self.frame1, text=_("Nouveau chapitre"), command=fct_main.nouveau_chapitre).grid(row=2, column=0, padx=5, pady=5)
 
         self.list_chapitre = design.creer_list_chapitre(self.frame1)
 
@@ -57,7 +72,7 @@ class main:
 
 
 
-        self.spell = SpellChecker(language='fr')
+        self.spell = SpellChecker(language=var.langue)
 
         self.text_widget.bind("<space>", self.verifier_orthographe)
         self.text_widget.bind("<Return>", self.verifier_orthographe)
@@ -72,7 +87,7 @@ class main:
         self.menu_correction = tk.Menu(self.master, tearoff=0)
 
         # Initialiser le vérificateur d'orthographe
-        self.spell = SpellChecker(language='fr')
+        self.spell = SpellChecker(language=var.langue)
 
         # Initialiser la classe de correction orthographique
         self.correcteur = CorrectionOrthographique(self.text_widget, self.spell, self.menu_correction)
@@ -83,11 +98,24 @@ class main:
 
         # Configurer le tag pour les erreurs
         self.text_widget.tag_configure("erreur", foreground="red", underline=True)
-
+    def langue(self):
+        try:
+            var.langue = db.tab_param_lire("langue")
+        except:
+            var.langue = "en"
+        print(var.langue)
     def verifier_orthographe(self):
         self.correcteur = CorrectionOrthographique(self.text_widget, self.spell, self.menu_correction)
-
     def update_text_widget(self):
+        self.langue()
+        try:
+            gettext.find("ScryBook")
+            traduction = gettext.translation(var.langue, localedir='src/locale', languages=[var.langue])
+            traduction.install()
+            print(traduction)
+        except:
+            gettext.install('ScryBook')
+            print("error")
         if hasattr(var, 'text_widget') and var.text_widget is not None:
             self.text_widget.destroy()
         self.text_widget = design.creer_zone_texte(self.frame2)
@@ -98,7 +126,7 @@ class main:
         self.menu_correction = tk.Menu(self.master, tearoff=0)
 
         # Initialiser le vérificateur d'orthographe
-        self.spell = SpellChecker(language='fr')
+        self.spell = SpellChecker(language=var.langue)
 
         # Initialiser la classe de correction orthographique
         self.correcteur = CorrectionOrthographique(self.text_widget, self.spell, self.menu_correction)
@@ -109,29 +137,15 @@ class main:
 
         # Configurer le tag pour les erreurs
         self.text_widget.tag_configure("erreur", foreground="red", underline=True)
-
-
-        """self.spell = SpellChecker(language='fr')
-        self.menu_correction = Menu(self.frame2, tearoff=0)
-        self.text_widget.bind("<space>", self.verifier_orthographe)
-        self.text_widget.bind("<Return>", self.verifier_orthographe)
-        self.text_widget.bind("<Button-3>", self.afficher_menu_correction)"""
-    """ self.scrollbar = ttk.Scrollbar(self.frame2, orient="vertical", command=self.text_widget.yview)
-        self.scrollbar.pack(side="right", fill="y")
-        self.text_widget.configure(yscrollcommand=self.scrollbar.set)"""
-
     def update_txt_resume(self):
         if hasattr(var, 'txt_resume') and var.txt_resume is not None:
             self.txt_resume.destroy()
         self.txt_resume = design.creer_zone_text_resume(self.frame1)
-
-
     def update_menu(self):
         if self.menubar is not None:
             self.menubar.destroy()
         self.menubar = design.create_menu()
         self.master.config(menu=self.menubar)
-
     def update_titre(self):
         if self.lab_nom_projet is not None:
             self.lab_nom_projet.destroy()
@@ -155,7 +169,6 @@ class main:
 
         # Assurez-vous que la colonne s'étende
         self.frame1.columnconfigure(0, weight=1)
-
     def toggle_bold(self):
         current_font = tk.font.Font(font=self.text_widget["font"])
         self.text_widget.tag_configure("bold", font=(current_font.actual("family"), current_font.actual("size"), "bold"))
@@ -197,8 +210,6 @@ class main:
                     self.text_widget.tag_add("underline", "sel.first", "sel.last")
         except tk.TclError:
             pass
-    #def update_label(self, new_text):
-    #    self.nom_projet.config(text=new_text)
     def item_selected(self, event):
         fct_main.save_projet()
         selected_item = self.list_chapitre.selection()
@@ -209,9 +220,6 @@ class main:
         except Exception as e:
             print(e)
         fct_main.ouvrir_chapitre(id)
-
-
-
     def right_clic(self, event):
         # create a popup menu
         selected_item = self.list_chapitre.selection()[0]
@@ -235,9 +243,20 @@ class main:
         print("effacer"+var.chapitre)
         id = var.chapitre
         fct_main.delete_chapitre(id, "chapitre")
+    def reload_all(self):
+        self.master.destroy()
+        var.chapitre = ""
+        var.path_dossier = ""
+        var.app_instance = ""
+        var.projet_en_cours = ""
+        var.nom = ""
+        var.dossier_projet = ""
+        root = tk.Tk()
+        page_principale = main(root)
+        root.protocol("WM_DELETE_WINDOW", quitter)
+        root.mainloop()
 
 root = tk.Tk()
-
 page_principale = main(root)
 root.protocol("WM_DELETE_WINDOW", quitter)
 root.mainloop()
