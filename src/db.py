@@ -231,7 +231,8 @@ def creer_table_param():
                     police TEXT,
                     taille TEXT,
                     save_time TEXT,
-                    langue TEXT
+                    langue TEXT,
+                    theme TEXT
                 )
                 ''')
 
@@ -241,7 +242,8 @@ def creer_table_param():
             'police': 'TEXT',
             'taille': 'TEXT',
             'save_time': 'TEXT',
-            'langue': 'TEXT'
+            'langue': 'TEXT',
+            'theme' : 'TEXT'
         }
     }
 
@@ -263,7 +265,7 @@ def creer_table_param():
     row_exists1 = cursor.fetchone()[0]
     if not row_exists1:
         # Insérer les données dans la table 'param'
-        cursor.execute("INSERT INTO param (police, taille, save_time, langue) VALUES (?, ?, ?, ?)", ("Helvetica", "12", "30", "en"))
+        cursor.execute("INSERT INTO param (police, taille, save_time, langue, theme) VALUES (?, ?, ?, ?, ?)", ("Helvetica", "12", "30", "en", "normal"))
 
     conn.commit()
     conn.close()
@@ -290,11 +292,11 @@ def tab_info_update(auteur, date, resume):
         conn.close()
     except Exception as e:
         fct_main.logs(e)
-def tab_param_update(police, taille, save, langue):
+def tab_param_update(police, taille, save, langue, theme):
     try:
         conn = sqlite3.connect(var.path_dossier + '/dbgene')
         cursor = conn.cursor()
-        cursor.execute("UPDATE param SET police = ?, taille = ?, save_time = ?, langue = ? WHERE id = '1'", (police, taille, save, langue))
+        cursor.execute("UPDATE param SET police = ?, taille = ?, save_time = ?, langue = ?, theme = ? WHERE id = '1'", (police, taille, save, langue, theme))
         conn.commit()
         conn.close()
     except Exception as e:

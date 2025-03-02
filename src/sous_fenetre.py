@@ -11,17 +11,17 @@ from src import var, db
 ##### Créer le chapitre #####
 def fenetre_chapitre():
     bg_color = var.bg_frame_mid
-
+    style = ttk.Style()
+    style.configure("Custom.TFrame", background=bg_color)
+    style.configure("TLabel", background=bg_color)
+    style.configure("TButton", background=bg_color)
     sous_fenetre = tk.Toplevel()
     sous_fenetre.title(_("Ajouter un chapitre"))
     sous_fenetre.geometry("680x520")
     sous_fenetre.iconbitmap('src/logoSb.ico')
     sous_fenetre.configure(bg=bg_color)
 
-    style = ttk.Style()
-    style.configure("Custom.TFrame", background=bg_color)
-    style.configure("TLabel", background=bg_color)
-    style.configure("TButton", background=bg_color)
+
 
     frame = ttk.Frame(sous_fenetre, padding="10", style="Custom.TFrame")
     frame.pack(fill=tk.BOTH, expand=True)
@@ -188,7 +188,11 @@ def fenetre_perso():
     sous_fenetre.title(_("Personnages"))
     sous_fenetre.geometry("600x500")
     sous_fenetre.iconbitmap('src/logoSb.ico')
-
+    bg_color = var.bg_frame_mid
+    style = ttk.Style()
+    style.configure("Custom.TFrame", background=bg_color)
+    style.configure("TLabel", background=bg_color)
+    style.configure("TButton", background=bg_color)
     style = ttk.Style()
     style.configure("Custom.TFrame", background=var.bg_frame_mid)
 
@@ -655,8 +659,13 @@ def fen_lieux(id):
 def ouvrir_fenetre_parametres_edition():
     fenetre_param = tk.Toplevel()
     fenetre_param.title(_("Paramètres"))
-    fenetre_param.geometry("300x350")  # Augmenté la hauteur pour accommoder le nouveau champ
-
+    fenetre_param.geometry("300x400")  # Augmenté la hauteur pour accommoder le nouveau champ
+    bg_color = var.bg_frame_mid
+    style = ttk.Style()
+    style.configure("Custom.TFrame", background=bg_color)
+    style.configure("TLabel", background=bg_color)
+    style.configure("TButton", background=bg_color)
+    fenetre_param.configure(bg=bg_color)
     # Récupérer la liste des polices système
     polices_systeme = list(font.families())
     polices_systeme.sort()
@@ -664,40 +673,44 @@ def ouvrir_fenetre_parametres_edition():
     # Récupérer les valeurs actuelles depuis la base de données
     conn = sqlite3.connect(var.path_dossier + "/dbgene")
     cursor = conn.cursor()
-    cursor.execute("SELECT police, taille, save_time, langue FROM param WHERE id = 1")
+    cursor.execute("SELECT police, taille, save_time, langue, theme FROM param WHERE id = 1")
     result = cursor.fetchone()
-    police_actuelle, taille_actuelle, save_time_actuelle, langue_actuelle = result if result else ('', '12', "30", "en")
+    police_actuelle, taille_actuelle, save_time_actuelle, langue_actuelle, theme_actuel = result if result else ('', '12', "30", "en", "clair")
     conn.close()
 
     # Sélection de la police
-    tk.Label(fenetre_param, text=_("Police :")).pack(pady=5)
+    tk.Label(fenetre_param, text=_("Police :"), bg=var.bg_frame_mid, fg=var.txt_police).pack(pady=5)
     var_police = tk.StringVar(value=police_actuelle)
     combo_police = ttk.Combobox(fenetre_param, textvariable=var_police, values=polices_systeme)
     combo_police.pack(pady=5)
 
     # Sélection de la taille
-    tk.Label(fenetre_param, text=_("Taille :")).pack(pady=5)
+    tk.Label(fenetre_param, text=_("Taille :"), bg=var.bg_frame_mid, fg=var.txt_police).pack(pady=5)
     tailles = list(range(10, 21))
     var_taille = tk.StringVar(value=taille_actuelle)
     combo_taille = ttk.Combobox(fenetre_param, textvariable=var_taille, values=tailles)
     combo_taille.pack(pady=5)
 
     # Sélection du délais d'enregistrement auto
-    tk.Label(fenetre_param, text=_("Sauvegarde auto (s) :")).pack(pady=5)
+    tk.Label(fenetre_param, text=_("Sauvegarde auto (s) :"), bg=var.bg_frame_mid, fg=var.txt_police).pack(pady=5)
     save_time = list(range(0, 121, 10))
     var_save_time = tk.StringVar(value=save_time_actuelle)
     combo_save_time = ttk.Combobox(fenetre_param, textvariable=var_save_time, values=save_time)
     combo_save_time.pack(pady=5)
 
     # Sélection de la langue
-    tk.Label(fenetre_param, text=_("Langue :")).pack(pady=5)
-    langues = ["fr", "en"]  # Ajoutez d'autres codes de langue selon vos besoins
+    tk.Label(fenetre_param, text=_("Langue :"), bg=var.bg_frame_mid, fg=var.txt_police).pack(pady=5)
+    langues = ["fr", "en", "es"]  # Ajoutez d'autres codes de langue selon vos besoins
     var_langue = tk.StringVar(value=langue_actuelle)
     combo_langue = ttk.Combobox(fenetre_param, textvariable=var_langue, values=langues)
     combo_langue.pack(pady=5)
 
-    # Ajoutez ici le code pour le bouton de sauvegarde et la gestion de la sauvegarde des paramètres
-
+    # Sélection du thème
+    tk.Label(fenetre_param, text=_("Thème :"), bg=var.bg_frame_mid, fg=var.txt_police).pack(pady=5)
+    themes = [_("clair"), _("sombre"), _("bleu"), _("vert")]
+    var_theme = tk.StringVar(value=theme_actuel)
+    combo_theme = ttk.Combobox(fenetre_param, textvariable=var_theme, values=themes)
+    combo_theme.pack(pady=5)
 
     # Bouton Sauvegarder
     def sauvegarder():
@@ -705,11 +718,11 @@ def ouvrir_fenetre_parametres_edition():
         var.param_taille = var_taille.get()
         var.save_time = var_save_time.get()
         var.save_langue = combo_langue.get()
-        db.tab_param_update(var_police.get(), var_taille.get(), var_save_time.get(), combo_langue.get())
+        var.theme = var_theme.get()
+        db.tab_param_update(var_police.get(), var_taille.get(), var_save_time.get(), combo_langue.get(), var_theme.get())
 
         fenetre_param.destroy()
         var.app_instance.reload_all()
-
 
     tk.Button(fenetre_param, text=_("Sauvegarder"), command=sauvegarder).pack(pady=10)
 
@@ -719,6 +732,7 @@ def ouvrir_fenetre_parametres_edition():
     fenetre_param.option_add("*TCombobox*Listbox.font", ("TkDefaultFont", 12))
 
     fenetre_param.mainloop()
+
 ##### Fenetre informations
 def ouvrir_fenetre_parametres_information():
     sous_fenetre = tk.Toplevel()

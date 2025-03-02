@@ -1,6 +1,6 @@
 import tkinter as tk
 import webbrowser
-
+from click import style
 from src import var, fct_main, export_pdf, export_docx, export_epub
 from tkinter import font, messagebox
 import src.sous_fenetre as sfenetre
@@ -38,7 +38,6 @@ def creer_sous_frames(frame_main):
     frame2.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
 
     return frame1, frame2
-
 def creer_bouton_haut():
 
     for widget in var.frame_haut.winfo_children():
@@ -52,9 +51,25 @@ def creer_bouton_haut():
     else:
         ttk.Button(frame_boutons, text=_("Nouveau projet"), command=fct_main.projet_new, width=15).pack(side="left", padx=2, pady=2)
         ttk.Button(frame_boutons, text=_("Ouvrir projet"), command=fct_main.open_projet, width=15).pack(side="left", padx=2, pady=2)
-
 def creer_list_chapitre(frame1):
-    list_chapitre = ttk.Treeview(frame1, height=10, columns=("ID", "Numero", "Nom"), show="headings")
+    # Créer un style personnalisé
+    style = ttk.Style()
+    style.theme_use('default')  # Utiliser le thème par défaut comme base
+
+    # Configurer le style pour le Treeview
+    style.configure("Custom.Treeview",
+                    background=var.txt_fond,
+                    foreground=var.txt_police,
+                    fieldbackground=var.txt_fond)
+
+    # Configurer le style pour l'en-tête du Treeview
+    style.configure("Custom.Treeview.Heading",
+                    background=var.txt_fond,
+                    foreground=var.txt_police)
+
+    # Créer le Treeview avec le style personnalisé
+    list_chapitre = ttk.Treeview(frame1, height=10, columns=("ID", "Numero", "Nom"),
+                                 show="headings", style="Custom.Treeview")
 
     # Configuration des en-têtes
     list_chapitre.heading("ID", text=_("ID"))
@@ -66,20 +81,18 @@ def creer_list_chapitre(frame1):
     list_chapitre.column("Numero", width=50, stretch=tk.NO)
     list_chapitre.column("Nom", width=100, stretch=tk.YES)
 
-    # Liaison des événements
-
-
     # Positionnement du Treeview
     list_chapitre.grid(row=1, column=0, padx=5, pady=5)
-    return list_chapitre
 
+    return list_chapitre
 def creer_toolbar(parent):
-    toolbar = tk.Frame(parent)
+    toolbar = tk.Frame(parent, bg=var.bg_frame_mid)  # Ajout de bg=var.txt_fond
     toolbar.pack(side="top", fill="x")
     return toolbar
-
-def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl, corrige):
-    bold_button = ttk.Button(toolbar, text=_("Gras"), command=toggle_bold)
+def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl, corrige, inserer_image):
+    style = ttk.Style()
+    style.configure('Black.TButton', foreground='white', background='black')
+    bold_button = ttk.Button(toolbar, text=_("Gras"), command=toggle_bold, style='Black.TButton')
     bold_button.pack(side="left", padx=2, pady=2)
     italic_button = ttk.Button(toolbar, text=_("Italique"), command=toggle_italic)
     italic_button.pack(side="left", padx=2, pady=2)
@@ -87,13 +100,14 @@ def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl, corrig
     sl_button.pack(side="left", padx=2, pady=2)
     corrige_button = ttk.Button(toolbar, text=_("Corriger"), command=corrige)
     corrige_button.pack(side="left", padx=2, pady=2)
-    return bold_button, italic_button, sl_button, corrige
-
+    image_button = ttk.Button(toolbar, text=_("Image"), command=inserer_image)
+    image_button.pack(side="left", padx=2, pady=2)
+    return bold_button, italic_button, sl_button, corrige, image_button
 def creer_zone_texte(parent):
     # Créer un cadre pour contenir le widget Text et la barre de défilement
     if hasattr(var.app_instance, 'text_widget') and var.app_instance.text_widget.winfo_exists():
         var.app_instance.text_widget.destroy()
-    text_widget = tk.Text(parent, wrap="word", undo=True)
+    text_widget = tk.Text(parent, wrap="word", undo=True, bg=var.txt_fond, fg=var.txt_police)  # Utilisation de var.txt_police
     text_widget.config(font=(var.param_police, int(var.param_taille)), padx=20, pady=0, spacing1=4, spacing2=4, spacing3=4)
     text_widget.pack(side="left", expand=True, fill="both")
 
@@ -104,8 +118,11 @@ def creer_zone_texte(parent):
     text_widget.tag_configure("italic", font=(var.param_police, int(var.param_taille), "italic"))
     text_widget.tag_configure("underline", underline=True)
 
-    return text_widget
+    # Configurer une balise pour le texte avec la couleur définie dans var.txt_police
+    text_widget.tag_configure("couleur_texte", foreground=var.txt_police)
+    text_widget.tag_add("couleur_texte", "1.0", "end")
 
+    return text_widget
 def creer_zone_text_resume(parent):
     if hasattr(var.app_instance, 'txt_resume') and var.app_instance.txt_resume.winfo_exists():
         var.app_instance.txt_resume.destroy()
@@ -119,7 +136,9 @@ def creer_zone_text_resume(parent):
     parent.grid_columnconfigure(0, weight=0)  # Pas de redimensionnement horizontal
 
     # Créer le widget Text avec une largeur fixe de 18 caractères
-    txt_resume = tk.Text(frame, wrap="word", width=18, undo=True)
+    txt_resume = tk.Text(frame, wrap="word", width=18, undo=True, bg=var.txt_fond, fg=var.txt_police)
+    txt_resume.tag_configure("couleur_texte", foreground=var.txt_police)
+    txt_resume.tag_add("couleur_texte", "1.0", "end")
     txt_resume.grid(row=0, column=0, sticky='nsew')
 
     # Créer la barre de défilement verticale
@@ -135,21 +154,32 @@ def creer_zone_text_resume(parent):
     frame.grid_columnconfigure(1, weight=0)  # Pas de redimensionnement pour la scrollbar
 
     return txt_resume
-
 def projet_new():
     fct_main.projet_new()
-
 def rac_s(ev=None):
     fct_main.save_projet()
-
 def projet_open():
     fct_main.open_projet()
-
 def projet_save():
     return
+def create_menu(root):
+    style = ttk.Style()
+    style.theme_use("clam")
+    style.configure("TMenubar", background="blue")
+    root.option_add('*Menu.Background', var.bg_frame_haut)
+    root.option_add('*Menu.Foreground', var.txt_police)
 
-def create_menu():
-    menubar = tk.Menu()
+    # Création de la barre de menu
+    menubar = tk.Menu(root)
+    root.config(menu=menubar)
+
+
+    """print(var.bg_frame_haut+ var.txt_police)
+    style = ttk.Style()
+    style.theme_use("default")
+    style.configure("TMenubar", background="black", foreground="white")
+    menubar = tk.Menu(root, style="TMenubar")
+    root.config(menu=menubar)"""
     menu1 = tk.Menu(menubar, tearoff=0)
     menu1.add_command(label=_("Nouveau projet"), command=projet_new)
     menu1.add_command(label=_("Ouvrir un Projet"), command=projet_open)
@@ -178,12 +208,13 @@ def create_menu():
     menubar.bind_all('<Control-s>', rac_s)
 
     return menubar
-
 def creer_label_version(frame_bas):
-    lab_version = tk.Label(master=frame_bas, bg=var.bg_frame_haut, text=_("ScryBook version :") + var.version)
+    lab_version = tk.Label(master=frame_bas,
+                           bg=var.txt_fond,  # Utilisation de var.txt_fond pour le fond
+                           fg=var.txt_police,  # Utilisation de var.txt_police pour le texte
+                           text=_("ScryBook version :") + var.version)
     lab_version.grid(row=0, column=1, padx=5, pady=5)
     return lab_version
-
 def configurer_tags_texte(text_widget):
     text_widget.tag_configure("bold", font=font.Font(weight="bold"))
     text_widget.tag_configure("italic", font=font.Font(slant="italic"))

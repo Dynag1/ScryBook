@@ -10,28 +10,21 @@ from spellchecker import SpellChecker
 import re
 import gettext
 import locale
+from tkinter import filedialog
+from PIL import Image, ImageTk
+
 global app_instance
 app_instance = None
 def quitter():
     os._exit(0)
-
 class main:
-
     def __init__(self, master):
         chemin_repertoire = os.getcwd()
         var.path_dossier = chemin_repertoire
         db.creer_table_param()
-        try:
             # Obtenir la langue du système
-
-            var.langue = db.tab_param_lire("langue")
-            gettext.find("ScryBook")
-            traduction = gettext.translation(var.langue, localedir='src/locale', languages=[var.langue])
-            traduction.install()
-            print(traduction)
-        except:
-            gettext.install('ScryBook')
-            print("error")
+        self.get_theme()
+        self.get_lang()
         global app_instance
         self.master = master
         var.app_instance = self
@@ -47,56 +40,37 @@ class main:
         self.frame_main = design.creer_frame_main(master)
         self.frame_bas = design.creer_frame_bas(master)
         self.frame1, self.frame2 = design.creer_sous_frames(self.frame_main)
-
         self.lab_nom_projet = tk.Label(master=self.frame1, bg=var.bg_frame_haut, text=var.nom, height=2, anchor='w')
-
-        # Assurez-vous que la colonne s'étende
         self.frame1.columnconfigure(0, weight=1)
-
         design.creer_bouton_haut()
         self.but_chapitre = ttk.Button(self.frame1, text=_("Nouveau chapitre"), command=fct_main.nouveau_chapitre).grid(row=2, column=0, padx=5, pady=5)
-
         self.list_chapitre = design.creer_list_chapitre(self.frame1)
-
-        # Liaison des événements
         self.list_chapitre.bind('<ButtonRelease-1>', self.item_selected)
         self.list_chapitre.bind('<Button-3>', self.right_clic)
         self.list_chapitre.bind('<Double-1>', lambda e: self.resume())
-
         self.txt_resume = design.creer_zone_text_resume(self.frame1)
-
         self.toolbar = design.creer_toolbar(self.frame2)
-        self.bold_button, self.italic_button, self.sl_button, self.corrige = design.creer_boutons_toolbar(self.toolbar, self.toggle_bold, self.toggle_italic, self.toggle_sl, self.verifier_orthographe)
+        self.bold_button, self.italic_button, self.sl_button, self.corrige, self.inserer_image = design.creer_boutons_toolbar(self.toolbar, self.toggle_bold, self.toggle_italic, self.toggle_sl, self.verifier_orthographe, self.inserer_image)
         self.text_widget = design.creer_zone_texte(self.frame2)
+
         self.text_widget.tag_configure("erreur", foreground="red")
-
-
-
         self.spell = SpellChecker(language=var.langue)
-
         self.text_widget.bind("<space>", self.verifier_orthographe)
         self.text_widget.bind("<Return>", self.verifier_orthographe)
-
         self.menu_correction = tk.Menu(self.master, tearoff=0)
         self.lab_version = design.creer_label_version(self.frame_bas)
-        self.menubar = design.create_menu()
-        self.master.config(menu=self.menubar)
+        design.create_menu(self.master)
+        #self.menubar = design.create_menu()
+
+        #self.master.config(menu=self.menubar)
         design.configurer_tags_texte(self.text_widget)
 
-        # Créer le menu de correction
+
         self.menu_correction = tk.Menu(self.master, tearoff=0)
-
-        # Initialiser le vérificateur d'orthographe
         self.spell = SpellChecker(language=var.langue)
-
-        # Initialiser la classe de correction orthographique
         self.correcteur = CorrectionOrthographique(self.text_widget, self.spell, self.menu_correction)
-
-        # Lier les événements
         self.text_widget.bind('<KeyRelease>', self.correcteur.verifier_orthographe)
         self.text_widget.bind('<Button-3>', self.correcteur.afficher_menu_correction)
-
-        # Configurer le tag pour les erreurs
         self.text_widget.tag_configure("erreur", foreground="red", underline=True)
     def langue(self):
         try:
@@ -121,7 +95,8 @@ class main:
         self.text_widget = design.creer_zone_texte(self.frame2)
         self.text_widget.pack(fill=tk.BOTH, expand=True)
         self.text_widget.tag_configure("erreur", foreground="red")
-
+        self.text_widget.tag_configure("tag_txt", foreground=var.txt_police)
+        self.text_widget.tag_add("tag_txt", "1.0", "end")
         # Créer le menu de correction
         self.menu_correction = tk.Menu(self.master, tearoff=0)
 
@@ -141,14 +116,18 @@ class main:
         if hasattr(var, 'txt_resume') and var.txt_resume is not None:
             self.txt_resume.destroy()
         self.txt_resume = design.creer_zone_text_resume(self.frame1)
+        self.txt_resume.tag_configure("tag_txt", foreground=var.txt_police)
+        self.txt_resume.tag_add("tag_txt", "1.0", "end")
     def update_menu(self):
         if self.menubar is not None:
             self.menubar.destroy()
         self.menubar = design.create_menu()
         self.master.config(menu=self.menubar)
+
     def update_titre(self):
         if self.lab_nom_projet is not None:
             self.lab_nom_projet.destroy()
+
         # Créez une police en gras
         bold_font = tkFont.Font(weight="bold")
 
@@ -157,9 +136,9 @@ class main:
 
         self.lab_nom_projet = tk.Label(
             master=self.frame1,
-            bg=var.bg_frame_haut,
+            bg=var.txt_fond,  # Utilisation de var.txt_fond pour le fond
+            fg=var.txt_police,  # Utilisation de var.txt_police pour le texte
             text=var.nom,
-            #height="auto",
             anchor='center',
             font=bold_font,
             wraplength=label_width,  # Permet le retour à la ligne automatique
@@ -169,6 +148,7 @@ class main:
 
         # Assurez-vous que la colonne s'étende
         self.frame1.columnconfigure(0, weight=1)
+
     def toggle_bold(self):
         current_font = tk.font.Font(font=self.text_widget["font"])
         self.text_widget.tag_configure("bold", font=(current_font.actual("family"), current_font.actual("size"), "bold"))
@@ -255,6 +235,91 @@ class main:
         page_principale = main(root)
         root.protocol("WM_DELETE_WINDOW", quitter)
         root.mainloop()
+    def get_lang(self):
+        try:
+            var.langue = db.tab_param_lire("langue")
+            gettext.find("ScryBook")
+            traduction = gettext.translation(var.langue, localedir='src/locale', languages=[var.langue])
+            traduction.install()
+            print(traduction)
+        except:
+            gettext.install('ScryBook')
+            print("error")
+
+    def get_theme(self):
+        theme_colors = {
+            "clair": {
+                "bg_frame_haut": "#9a9a9a",
+                "bg_frame_mid": "#c8c8c8",
+                "bg_frame_droit": "#c8c8c8",
+                "bg_but": "#c8c8c8",
+                "txt_fond": "#ffffff",
+                "txt_police": "#000000"
+            },
+            "sombre": {
+                "bg_frame_haut": "#494949",
+                "bg_frame_mid": "#7c7b7b",
+                "bg_frame_droit": "#7c7b7b",
+                "bg_but": "#7c7b7b",
+                "txt_fond": "#292929",
+                "txt_police": "#ffffff"
+            },
+            "bleu": {
+                "bg_frame_haut": "#327ec6",
+                "bg_frame_mid": "#9dc3e7",
+                "bg_frame_droit": "#9dc3e7",
+                "bg_but": "#327ec6",
+                "txt_fond": "#ffffff",
+                "txt_police": "#000000"
+            },
+            "vert": {
+                "bg_frame_haut": "#4c925e",
+                "bg_frame_mid": "#9de7b0",
+                "bg_frame_droit": "#9de7b0",
+                "bg_but": "#4c925e",
+                "txt_fond": "#9de7b0",
+                "txt_police": "#000000"
+            }
+        }
+
+        theme = db.tab_param_lire("theme")
+        if theme in theme_colors:
+            for key, value in theme_colors[theme].items():
+                setattr(var, key, value)
+
+    def inserer_image(self):
+        # Ouvrir une boîte de dialogue pour choisir un fichier image
+        chemin_fichier = filedialog.askopenfilename(
+            title="Choisir une image",
+            filetypes=[("Images", "*.png *.jpg *.jpeg *.gif *.bmp")]
+        )
+
+        if chemin_fichier:
+            try:
+                # Ouvrir l'image avec PIL
+                image_pil = Image.open(chemin_fichier)
+
+                # Redimensionner l'image si nécessaire (par exemple, max 300x300 pixels)
+                image_pil.thumbnail((300, 300))
+
+                # Convertir l'image PIL en PhotoImage Tkinter
+                image_tk = ImageTk.PhotoImage(image_pil)
+
+                # Obtenir la position actuelle du curseur
+                position_curseur = self.text_widget.index(tk.INSERT)
+
+                # Insérer l'image à la position du curseur
+                self.text_widget.image_create(position_curseur, image=image_tk)
+
+                # Garder une référence à l'image pour éviter qu'elle ne soit supprimée par le garbage collector
+                if not hasattr(self.text_widget, 'images'):
+                    self.text_widget.images = []
+                self.text_widget.images.append(image_tk)
+
+                print(f"Image insérée à la position {position_curseur} : {chemin_fichier}")
+            except Exception as e:
+                print(f"Erreur lors de l'insertion de l'image : {e}")
+
 
 root = tk.Tk()
 page_principale = main(root)
