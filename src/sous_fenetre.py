@@ -700,7 +700,7 @@ def ouvrir_fenetre_parametres_edition():
 
     # Sélection de la langue
     tk.Label(fenetre_param, text=_("Langue :"), bg=var.bg_frame_mid, fg=var.txt_police).pack(pady=5)
-    langues = ["fr", "en", "es"]  # Ajoutez d'autres codes de langue selon vos besoins
+    langues = ["fr", "en"]  # Ajoutez d'autres codes de langue selon vos besoins
     var_langue = tk.StringVar(value=langue_actuelle)
     combo_langue = ttk.Combobox(fenetre_param, textvariable=var_langue, values=langues)
     combo_langue.pack(pady=5)

@@ -16,6 +16,7 @@ Il permet une gestion complète des informations relatives à l'écriture
 - Gestion des polices
 - Gestion de la taille des caractères
 - Recherche automatique de mise à jour
+- Langues supportés : en, fr
 
 ## Dernière Version
 

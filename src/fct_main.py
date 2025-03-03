@@ -138,38 +138,86 @@ def close_projet():
 ##### Sauvegarder le chapitre #####
 def save_projet():
     if var.chapitre != "":
-        def get_formatted_content(self):
-            content = []
-            for index in range(1, int(self.index(tk.END).split('.')[0])):
-                line_start = f"{index}.0"
-                line_end = f"{index}.end"
-                line = self.get(line_start, line_end)
-                formatted_line = ""
-                for i, char in enumerate(line):
-                    char_index = f"{index}.{i}"
-                    tags = self.tag_names(char_index)
-                    if "bold" in tags and "italic" in tags and "underline" in tags:
-                        formatted_line += f"<b><i><u>{char}</u></i></b>"
-                    elif "bold" in tags and "italic" in tags:
-                        formatted_line += f"<b><i>{char}</i></b>"
-                    elif "bold" in tags and "underline" in tags:
-                        formatted_line += f"<b><u>{char}</u></b>"
-                    elif "italic" in tags and "underline" in tags:
-                        formatted_line += f"<i><u>{char}</u></i>"
-                    elif "bold" in tags:
-                        formatted_line += f"<b>{char}</b>"
-                    elif "italic" in tags:
-                        formatted_line += f"<i>{char}</i>"
-                    elif "underline" in tags:
-                        formatted_line += f"<u>{char}</u>"
-                    else:
-                        formatted_line += char
-                content.append(formatted_line)
-            return "\n".join(content).rstrip('\n')  # Supprime le dernier \n
+        content = get_formatted_content(var.app_instance.text_widget)
 
-        with open(var.dossier_projet+"/"+var.chapitre, "w", encoding='utf-8') as f:
-            content = get_formatted_content(var.app_instance.text_widget)
+        # Créer un dossier pour les images si nécessaire
+        images_folder = os.path.join(var.dossier_projet, "images")
+        os.makedirs(images_folder, exist_ok=True)
+
+        with open(os.path.join(var.dossier_projet, var.chapitre), "w", encoding='utf-8') as f:
             f.write(content)
+
+
+def get_formatted_content(text_widget):
+    content = []
+    image_count = 0
+    for index in range(1, int(text_widget.index(tk.END).split('.')[0])):
+        line_start = f"{index}.0"
+        line_end = f"{index}.end"
+        formatted_line = ""
+        i = 0
+        while True:
+            char_index = f"{index}.{i}"
+            if char_index == line_end:
+                break
+            tags = text_widget.tag_names(char_index)
+
+            if "image" in tags:
+                image = text_widget.image_cget(char_index, "image")
+                if image:
+                    # Générer un nom de fichier unique
+                    image_filename = f"image_{uuid.uuid4().hex[:8]}"
+
+                    # Sauvegarder l'image en PNG et JPG
+                    save_image(image, image_filename)
+
+                    # Ajouter le tag d'image dans le contenu
+                    formatted_line += f"<IMG>{image_filename}</IMG>"
+                    image_count += 1
+                i += 1  # Les images sont considérées comme un seul caractère
+            else:
+                char = text_widget.get(char_index)
+                if "bold" in tags and "italic" in tags and "underline" in tags:
+                    formatted_line += f"<b><i><u>{char}</u></i></b>"
+                elif "bold" in tags and "italic" in tags:
+                    formatted_line += f"<b><i>{char}</i></b>"
+                elif "bold" in tags and "underline" in tags:
+                    formatted_line += f"<b><u>{char}</u></b>"
+                elif "italic" in tags and "underline" in tags:
+                    formatted_line += f"<i><u>{char}</u></i>"
+                elif "bold" in tags:
+                    formatted_line += f"<b>{char}</b>"
+                elif "italic" in tags:
+                    formatted_line += f"<i>{char}</i>"
+                elif "underline" in tags:
+                    formatted_line += f"<u>{char}</u>"
+                else:
+                    formatted_line += char
+                i += 1
+        content.append(formatted_line)
+    print(f"Nombre d'images sauvegardées : {image_count}")
+    return "\n".join(content).rstrip('\n')
+
+
+def save_image(image, filename):
+    images_folder = os.path.join(var.dossier_projet, "images")
+
+    if isinstance(image, tk.PhotoImage):
+        # Convertir PhotoImage en Image PIL
+        image_pil = Image.new("RGBA", (image.width(), image.height()))
+        image_pil.paste(Image.frombytes("RGBA", (image.width(), image.height()), image.get()), (0, 0))
+    elif isinstance(image, ImageTk.PhotoImage):
+        image_pil = image._PhotoImage__photo
+    else:
+        image_pil = image
+
+    # Sauvegarder en PNG
+    png_path = os.path.join(images_folder, f"{filename}.png")
+    image_pil.save(png_path, "PNG")
+
+    # Sauvegarder en JPG
+    jpg_path = os.path.join(images_folder, f"{filename}.jpg")
+    image_pil.convert("RGB").save(jpg_path, "JPEG")
 ##### Nouveau Chapitre #####
 def nouveau_chapitre():
     sous_fenetre.fenetre_chapitre()

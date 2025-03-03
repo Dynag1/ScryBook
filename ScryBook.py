@@ -52,7 +52,6 @@ class main:
         self.toolbar = design.creer_toolbar(self.frame2)
         self.bold_button, self.italic_button, self.sl_button, self.corrige, self.inserer_image = design.creer_boutons_toolbar(self.toolbar, self.toggle_bold, self.toggle_italic, self.toggle_sl, self.verifier_orthographe, self.inserer_image)
         self.text_widget = design.creer_zone_texte(self.frame2)
-
         self.text_widget.tag_configure("erreur", foreground="red")
         self.spell = SpellChecker(language=var.langue)
         self.text_widget.bind("<space>", self.verifier_orthographe)
@@ -60,26 +59,39 @@ class main:
         self.menu_correction = tk.Menu(self.master, tearoff=0)
         self.lab_version = design.creer_label_version(self.frame_bas)
         design.create_menu(self.master)
-        #self.menubar = design.create_menu()
-
-        #self.master.config(menu=self.menubar)
         design.configurer_tags_texte(self.text_widget)
-
-
         self.menu_correction = tk.Menu(self.master, tearoff=0)
         self.spell = SpellChecker(language=var.langue)
         self.correcteur = CorrectionOrthographique(self.text_widget, self.spell, self.menu_correction)
         self.text_widget.bind('<KeyRelease>', self.correcteur.verifier_orthographe)
         self.text_widget.bind('<Button-3>', self.correcteur.afficher_menu_correction)
         self.text_widget.tag_configure("erreur", foreground="red", underline=True)
+
+##### Définir la langue
     def langue(self):
         try:
             var.langue = db.tab_param_lire("langue")
         except:
             var.langue = "en"
         print(var.langue)
+
+##### Récupérer le fichier langue
+    def get_lang(self):
+        try:
+            var.langue = db.tab_param_lire("langue")
+            gettext.find("ScryBook")
+            traduction = gettext.translation(var.langue, localedir='src/locale', languages=[var.langue])
+            traduction.install()
+            print(var.langue)
+        except:
+            gettext.install('ScryBook')
+            print("error")
+
+##### Correcteur d'orthographe
     def verifier_orthographe(self):
         self.correcteur = CorrectionOrthographique(self.text_widget, self.spell, self.menu_correction)
+
+##### MAJ Widget Texte
     def update_text_widget(self):
         self.langue()
         try:
@@ -112,6 +124,8 @@ class main:
 
         # Configurer le tag pour les erreurs
         self.text_widget.tag_configure("erreur", foreground="red", underline=True)
+
+##### MAJ Widget résume
     def update_txt_resume(self):
         if hasattr(var, 'txt_resume') and var.txt_resume is not None:
             self.txt_resume.destroy()
@@ -123,7 +137,6 @@ class main:
             self.menubar.destroy()
         self.menubar = design.create_menu()
         self.master.config(menu=self.menubar)
-
     def update_titre(self):
         if self.lab_nom_projet is not None:
             self.lab_nom_projet.destroy()
@@ -148,7 +161,7 @@ class main:
 
         # Assurez-vous que la colonne s'étende
         self.frame1.columnconfigure(0, weight=1)
-
+##### Txt Mise en gras
     def toggle_bold(self):
         current_font = tk.font.Font(font=self.text_widget["font"])
         self.text_widget.tag_configure("bold", font=(current_font.actual("family"), current_font.actual("size"), "bold"))
@@ -162,6 +175,8 @@ class main:
                     self.text_widget.tag_add("bold", "sel.first", "sel.last")
         except tk.TclError:
             pass
+
+##### Txt Mise en Italique
     def toggle_italic(self):
         current_font = tk.font.Font(font=self.text_widget["font"])
         self.text_widget.tag_configure("italic",
@@ -176,6 +191,7 @@ class main:
                     self.text_widget.tag_add("italic", "sel.first", "sel.last")
         except tk.TclError:
             pass
+##### Txt Mise en surlignage
     def toggle_sl(self):
         current_font = tk.font.Font(font=self.text_widget["font"])
         self.text_widget.tag_configure("underline", font=(current_font.actual("family"), current_font.actual("size")),
@@ -191,6 +207,7 @@ class main:
         except tk.TclError:
             pass
     def item_selected(self, event):
+        id = ""
         fct_main.save_projet()
         selected_item = self.list_chapitre.selection()
         result = self.list_chapitre.item(selected_item)["values"]
@@ -235,16 +252,6 @@ class main:
         page_principale = main(root)
         root.protocol("WM_DELETE_WINDOW", quitter)
         root.mainloop()
-    def get_lang(self):
-        try:
-            var.langue = db.tab_param_lire("langue")
-            gettext.find("ScryBook")
-            traduction = gettext.translation(var.langue, localedir='src/locale', languages=[var.langue])
-            traduction.install()
-            print(traduction)
-        except:
-            gettext.install('ScryBook')
-            print("error")
 
     def get_theme(self):
         theme_colors = {
@@ -286,7 +293,6 @@ class main:
         if theme in theme_colors:
             for key, value in theme_colors[theme].items():
                 setattr(var, key, value)
-
     def inserer_image(self):
         # Ouvrir une boîte de dialogue pour choisir un fichier image
         chemin_fichier = filedialog.askopenfilename(
