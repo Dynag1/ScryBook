@@ -88,17 +88,15 @@ def open_projet():
             db.creer_table_gene(var.dossier_projet)
             db.creer_table_chapitre(var.dossier_projet)
             var.app_instance.update_titre()
-            design.creer_bouton_haut()
+
             db.liste_chapitre()
-            design.create_menu()
             var.param_police = db.tab_param_lire("police")
             var.param_taille = db.tab_param_lire("taille")
             var.save_time = int(db.tab_param_lire("save_time"))
             var.info_auteur = db.tab_info_lire("auteur")
             var.info_date = db.tab_info_lire("date")
             var.info_resume = db.tab_info_lire("resume")
-            var.app_instance.update_text_widget()
-            var.app_instance.update_menu()
+            var.app_instance.ouvrir_fichier()
         fct()
         thread = threading.Thread(target=enregistrement_auto)
         thread.start()
@@ -112,7 +110,7 @@ def enregistrement_auto(tk=None):
         if var.save_time == 0:
             print("Stop save")
             tourne  =False
-        save_projet()
+        threading.Thread(target=save_projet()).start()
         print("save")
         time.sleep(var.save_time)
 def close_projet():
@@ -138,86 +136,180 @@ def close_projet():
 ##### Sauvegarder le chapitre #####
 def save_projet():
     if var.chapitre != "":
-        content = get_formatted_content(var.app_instance.text_widget)
+        def get_formatted_content(self):
+            content = []
+            for index in range(1, int(self.index(tk.END).split('.')[0])):
+                line_start = f"{index}.0"
+                line_end = f"{index}.end"
+                line = self.get(line_start, line_end)
+                formatted_line = ""
+                for i, char in enumerate(line):
+                    char_index = f"{index}.{i}"
+                    tags = self.tag_names(char_index)
+                    if "bold" in tags and "italic" in tags and "underline" in tags:
+                        formatted_line += f"<b><i><u>{char}</u></i></b>"
+                    elif "bold" in tags and "italic" in tags:
+                        formatted_line += f"<b><i>{char}</i></b>"
+                    elif "bold" in tags and "underline" in tags:
+                        formatted_line += f"<b><u>{char}</u></b>"
+                    elif "italic" in tags and "underline" in tags:
+                        formatted_line += f"<i><u>{char}</u></i>"
+                    elif "bold" in tags:
+                        formatted_line += f"<b>{char}</b>"
+                    elif "italic" in tags:
+                        formatted_line += f"<i>{char}</i>"
+                    elif "underline" in tags:
+                        formatted_line += f"<u>{char}</u>"
+                    else:
+                        formatted_line += char
+                content.append(formatted_line)
+            return "\n".join(content).rstrip('\n')  # Supprime le dernier \n
 
-        # Créer un dossier pour les images si nécessaire
-        images_folder = os.path.join(var.dossier_projet, "images")
-        os.makedirs(images_folder, exist_ok=True)
-
-        with open(os.path.join(var.dossier_projet, var.chapitre), "w", encoding='utf-8') as f:
+        with open(var.dossier_projet+"/"+var.chapitre, "w", encoding='utf-8') as f:
+            content = get_formatted_content(var.app_instance.text_widget)
             f.write(content)
 
 
-def get_formatted_content(text_widget):
+import tkinter as tk
+from tkinter import ttk
+import os
+from PIL import Image, ImageTk
+import uuid
+
+
+def save_projet_image():
+    if var.chapitre != "":
+        # Créer une fenêtre de progression
+        progress_window = tk.Toplevel()
+        progress_window.title("Sauvegarde en cours")
+        progress_bar = ttk.Progressbar(progress_window, length=300, mode='determinate')
+        progress_bar.pack(pady=10)
+        progress_label = tk.Label(progress_window, text="Sauvegarde en cours...")
+        progress_label.pack(pady=5)
+
+        try:
+            content = get_formatted_content_image(var.app_instance.text_widget, progress_bar, progress_label)
+
+            # Créer un dossier pour les images si nécessaire
+            images_folder = os.path.join(var.dossier_projet, "images")
+            os.makedirs(images_folder, exist_ok=True)
+
+            # Sauvegarder le contenu texte
+            with open(os.path.join(var.dossier_projet, var.chapitre), "w", encoding='utf-8') as f:
+                f.write(content)
+
+            progress_label.config(text="Sauvegarde terminée!")
+        except Exception as e:
+            print({str(e)})
+            progress_label.config(text=f"Erreur: {str(e)}")
+        finally:
+            progress_window.after(2000, progress_window.destroy)
+
+
+def get_formatted_content_image(text_widget, progress_bar, progress_label):
     content = []
-    image_count = 0
-    for index in range(1, int(text_widget.index(tk.END).split('.')[0])):
-        line_start = f"{index}.0"
-        line_end = f"{index}.end"
-        formatted_line = ""
-        i = 0
-        while True:
-            char_index = f"{index}.{i}"
-            if char_index == line_end:
-                break
-            tags = text_widget.tag_names(char_index)
+    total_chars = int(text_widget.index(tk.END).split('.')[0])
+    progress_bar['maximum'] = total_chars
 
-            if "image" in tags:
-                image = text_widget.image_cget(char_index, "image")
-                if image:
-                    # Générer un nom de fichier unique
-                    image_filename = f"image_{uuid.uuid4().hex[:8]}"
+    # Obtenir tous les indices d'images
+    image_indices = text_widget.image_names()
 
-                    # Sauvegarder l'image en PNG et JPG
-                    save_image(image, image_filename)
+    current_index = "1.0"
+    while text_widget.compare(current_index, "<", tk.END):
+        if current_index in image_indices:
+            # C'est une image
+            image = text_widget.image_cget(current_index, "image")
+            img_filename = save_image(image)
+            print(image)
+            if img_filename:
+                content.append(f"<IMG>{img_filename}</IMG>")
+            current_index = text_widget.index(f"{current_index}+1c")
+        else:
+            # C'est du texte
+            next_image_index = next((idx for idx in image_indices if text_widget.compare(idx, ">", current_index)),
+                                    tk.END)
+            text_chunk = text_widget.get(current_index, next_image_index)
+            formatted_chunk = format_text_chunk(text_widget, current_index, text_chunk)
+            content.append(formatted_chunk)
+            current_index = next_image_index
 
-                    # Ajouter le tag d'image dans le contenu
-                    formatted_line += f"<IMG>{image_filename}</IMG>"
-                    image_count += 1
-                i += 1  # Les images sont considérées comme un seul caractère
-            else:
-                char = text_widget.get(char_index)
-                if "bold" in tags and "italic" in tags and "underline" in tags:
-                    formatted_line += f"<b><i><u>{char}</u></i></b>"
-                elif "bold" in tags and "italic" in tags:
-                    formatted_line += f"<b><i>{char}</i></b>"
-                elif "bold" in tags and "underline" in tags:
-                    formatted_line += f"<b><u>{char}</u></b>"
-                elif "italic" in tags and "underline" in tags:
-                    formatted_line += f"<i><u>{char}</u></i>"
-                elif "bold" in tags:
-                    formatted_line += f"<b>{char}</b>"
-                elif "italic" in tags:
-                    formatted_line += f"<i>{char}</i>"
-                elif "underline" in tags:
-                    formatted_line += f"<u>{char}</u>"
-                else:
-                    formatted_line += char
-                i += 1
-        content.append(formatted_line)
-    print(f"Nombre d'images sauvegardées : {image_count}")
-    return "\n".join(content).rstrip('\n')
+        # Mise à jour de la barre de progression
+        progress_line = int(text_widget.index(current_index).split('.')[0])
+        progress_bar['value'] = progress_line
+        progress_label.config(text=f"Sauvegarde en cours... {progress_line}/{total_chars} lignes")
+        progress_bar.update()
+
+    return ''.join(content)
 
 
-def save_image(image, filename):
-    images_folder = os.path.join(var.dossier_projet, "images")
+def format_text_chunk(text_widget, start_index, text_chunk):
+    formatted_chunk = ""
+    for i, char in enumerate(text_chunk):
+        char_index = text_widget.index(f"{start_index}+{i}c")
+        tags = text_widget.tag_names(char_index)
+        formatted_char = format_char(char, tags)
+        formatted_chunk += formatted_char
+    return formatted_chunk
 
-    if isinstance(image, tk.PhotoImage):
-        # Convertir PhotoImage en Image PIL
-        image_pil = Image.new("RGBA", (image.width(), image.height()))
-        image_pil.paste(Image.frombytes("RGBA", (image.width(), image.height()), image.get()), (0, 0))
-    elif isinstance(image, ImageTk.PhotoImage):
-        image_pil = image._PhotoImage__photo
+
+def format_char(char, tags):
+    if "bold" in tags and "italic" in tags and "underline" in tags:
+        return f"<b><i><u>{char}</u></i></b>"
+    elif "bold" in tags and "italic" in tags:
+        return f"<b><i>{char}</i></b>"
+    elif "bold" in tags and "underline" in tags:
+        return f"<b><u>{char}</u></b>"
+    elif "italic" in tags and "underline" in tags:
+        return f"<i><u>{char}</u></i>"
+    elif "bold" in tags:
+        return f"<b>{char}</b>"
+    elif "italic" in tags:
+        return f"<i>{char}</i>"
+    elif "underline" in tags:
+        return f"<u>{char}</u>"
     else:
-        image_pil = image
+        return char
 
-    # Sauvegarder en PNG
-    png_path = os.path.join(images_folder, f"{filename}.png")
-    image_pil.save(png_path, "PNG")
 
-    # Sauvegarder en JPG
-    jpg_path = os.path.join(images_folder, f"{filename}.jpg")
-    image_pil.convert("RGB").save(jpg_path, "JPEG")
+
+def save_image(image):
+    try:
+        images_folder = os.path.join(var.dossier_projet, "images")
+        os.makedirs(images_folder, exist_ok=True)
+        image_filename = f"image_{uuid.uuid4().hex[:8]}.png"
+        png_path = os.path.join(images_folder, image_filename)
+
+        # Convertir l'image en objet PIL Image
+        if isinstance(image, str):
+            # Si c'est un chemin de fichier
+            image_pil = Image.open(image)
+        elif isinstance(image, tk.PhotoImage):
+            # Si c'est un PhotoImage Tkinter
+            image_pil = Image.new("RGBA", (image.width(), image.height()))
+            image_pil.paste(Image.frombytes("RGBA", (image.width(), image.height()), image.get()), (0, 0))
+        elif isinstance(image, ImageTk.PhotoImage):
+            # Si c'est un PhotoImage de PIL
+            image_pil = ImageTk.getimage(image)
+        elif isinstance(image, Image.Image):
+            # Si c'est déjà un objet PIL Image
+            image_pil = image
+        else:
+            raise ValueError("Type d'image non pris en charge")
+
+        # Redimensionner l'image
+        max_size = (800, 800)
+        image_pil.thumbnail(max_size, Image.LANCZOS)
+
+        # Sauvegarder l'image
+        image_pil.save(png_path, "PNG", optimize=True)
+
+        print(f"Image sauvegardée : {png_path}")
+        return image_filename
+    except Exception as e:
+        print(f"Erreur lors de la sauvegarde de l'image : {str(e)}")
+        return None
+
+
 ##### Nouveau Chapitre #####
 def nouveau_chapitre():
     sous_fenetre.fenetre_chapitre()
@@ -276,9 +368,6 @@ def ouvrir_chapitre(id):
         resume = db.lire("chapitre", id, "resume")
         var.app_instance.update_txt_resume()
         var.app_instance.txt_resume.insert(1.0, resume)
-
-
-
     except Exception as e:
         tk.messagebox.showerror(_("Erreur"), f_("Impossible d'ouvrir le fichier : {str(e)}"))
 ##### Supprimer le chapite #####

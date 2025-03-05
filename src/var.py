@@ -1,4 +1,4 @@
-version = "00.01.01"
+version = "00.01.02"
 nom = "ScryBook"
 site = 'http://prog.dynag.co'
 bg_frame_haut = "#9a9a9a"

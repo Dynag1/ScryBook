@@ -99,9 +99,10 @@ def exporter_textes_vers_docx():
     # Sauvegarder le document
     try:
         document.save(fichier_sortie)
-        fct_main.alert(f_("Le fichier DOCX a été enregistré sous : {fichier_sortie}"))
+        fct_main.alert(_("Le fichier DOCX a été enregistré sous :" ))
     except Exception as e:
-        fct_main.alert(f_("Une erreur est survenue : {e}"))
+        fct_main.alert(_("Une erreur est survenue : ")+e)
+        print("Une erreur est survenue : "+e)
     print(f"Le fichier DOCX a été enregistré sous : {fichier_sortie}")
 
     # Fermer la connexion à la base de données

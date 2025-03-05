@@ -198,7 +198,7 @@ def select_files_and_create_pdf():
 
     # Créer le PDF
     if create_pdf(input_files, output_file, title, subtitle, author, resume):
-        messagebox.showinfo(_("Succès"), f_("Le fichier PDF a été créé : {output_file}"))
+        messagebox.showinfo(_("Succès"), _(f"Le fichier PDF a été créé : {output_file}"))
     else:
         messagebox.showerror(_("Erreur", "La création du fichier PDF a échoué."))
 

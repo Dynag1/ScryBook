@@ -99,9 +99,9 @@ def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl, corrig
     sl_button = ttk.Button(toolbar, text=_("Sousligné"), command=toggle_sl)
     sl_button.pack(side="left", padx=2, pady=2)
     corrige_button = ttk.Button(toolbar, text=_("Corriger"), command=corrige)
-    corrige_button.pack(side="left", padx=2, pady=2)
+    #corrige_button.pack(side="left", padx=2, pady=2)
     image_button = ttk.Button(toolbar, text=_("Image"), command=inserer_image)
-    image_button.pack(side="left", padx=2, pady=2)
+    #image_button.pack(side="left", padx=2, pady=2)
     return bold_button, italic_button, sl_button, corrige, image_button
 def creer_zone_texte(parent):
     # Créer un cadre pour contenir le widget Text et la barre de défilement
@@ -157,12 +157,13 @@ def creer_zone_text_resume(parent):
 def projet_new():
     fct_main.projet_new()
 def rac_s(ev=None):
-    fct_main.save_projet()
+    fct_main.save_projet_image()
 def projet_open():
     fct_main.open_projet()
 def projet_save():
     return
 def create_menu(root):
+    print("menu")
     style = ttk.Style()
     style.theme_use("clam")
     style.configure("TMenubar", background="blue")
@@ -173,13 +174,6 @@ def create_menu(root):
     menubar = tk.Menu(root)
     root.config(menu=menubar)
 
-
-    """print(var.bg_frame_haut+ var.txt_police)
-    style = ttk.Style()
-    style.theme_use("default")
-    style.configure("TMenubar", background="black", foreground="white")
-    menubar = tk.Menu(root, style="TMenubar")
-    root.config(menu=menubar)"""
     menu1 = tk.Menu(menubar, tearoff=0)
     menu1.add_command(label=_("Nouveau projet"), command=projet_new)
     menu1.add_command(label=_("Ouvrir un Projet"), command=projet_open)
@@ -194,10 +188,16 @@ def create_menu(root):
 
     menu3 = tk.Menu(menubar, tearoff=0)
     menu3.add_command(label=_("PDF"), command=lambda : export_pdf.export())
+    menu3.entryconfigure("PDF", state="disabled")
     menu3.add_command(label=_("Docx"), command=lambda: export_docx.exporter_textes_vers_docx())
+    menu3.entryconfigure("Docx", state="disabled")
     menu3.add_command(label=_("Epub"), command=lambda: export_epub.exporter_textes_vers_epub())
+    menu3.entryconfigure("Epub", state="disabled")
+    menubar.add_cascade(label=_("Export"), menu=menu3)
     if var.dossier_projet != "":
-        menubar.add_cascade(label=_("Export"), menu=menu3)
+        menu3.entryconfigure("PDF", state="normal")
+        menu3.entryconfigure("Docx", state="normal")
+        menu3.entryconfigure("Epub", state="normal")
 
     menu4 = tk.Menu(menubar, tearoff=0)
     menu4.add_command(label=_("Readme"), command=lambda: webbrowser.open('https://github.com/Dynag1/ScryBook/blob/master/README.md'))
@@ -215,8 +215,5 @@ def creer_label_version(frame_bas):
                            text=_("ScryBook version :") + var.version)
     lab_version.grid(row=0, column=1, padx=5, pady=5)
     return lab_version
-def configurer_tags_texte(text_widget):
-    text_widget.tag_configure("bold", font=font.Font(weight="bold"))
-    text_widget.tag_configure("italic", font=font.Font(slant="italic"))
 
 
