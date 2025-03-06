@@ -16,12 +16,15 @@ Il permet une gestion complète des informations relatives à l'écriture
 - Gestion des polices
 - Gestion de la taille des caractères
 - Recherche automatique de mise à jour
-- Langues supportés : en, fr
+- Correction orthographique
+- Langues supportées : en, fr
 
 ## Dernière Version
 
 0.0.3
 ## A venir
+- Correction plus poussée
+- Ajout d'images
 
 # Télecharger
 [Version Windows portable](https://prog.dynag.co/ScryBook/ScryBook-win.zip)

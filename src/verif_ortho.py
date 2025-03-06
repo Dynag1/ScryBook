@@ -32,6 +32,14 @@ class CorrectionOrthographique:
 
         self.text_widget.tag_remove("erreur", "1.0", "end")
 
+        # Vérification des majuscules après un point
+        phrases = re.split(r'(?<=[.!?])\s+', contenu)
+        for i, phrase in enumerate(phrases):
+            if i > 0 and phrase and not phrase[0].isupper():
+                debut = contenu.index(phrase)
+                fin = debut + 1
+                self.text_widget.tag_add("erreur", f"1.0+{debut}c", f"1.0+{fin}c")
+
         for match in mots_avec_positions:
             mot = match.group()
             mot_lower = mot.lower()

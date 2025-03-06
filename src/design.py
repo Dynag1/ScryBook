@@ -49,8 +49,12 @@ def creer_bouton_haut():
         ttk.Button(frame_boutons, text=_("Personnages"), command=sfenetre.fenetre_perso, width=10).pack(side="left", padx=2, pady=2)
         ttk.Button(frame_boutons, text=_("Lieux"), command=sfenetre.fen_lieux_liste, width=10).pack(side="left", padx=2, pady=2)
     else:
-        ttk.Button(frame_boutons, text=_("Nouveau projet"), command=fct_main.projet_new, width=15).pack(side="left", padx=2, pady=2)
-        ttk.Button(frame_boutons, text=_("Ouvrir projet"), command=fct_main.open_projet, width=15).pack(side="left", padx=2, pady=2)
+        but_nouveau = (ttk.Button(frame_boutons, text=_("Nouveau projet"), command=fct_main.projet_new, width=15))
+        but_nouveau.pack(side="left", padx=2, pady=2)
+        var.app_instance.create_tooltip(but_nouveau, _("Créer un nouveau projet"))
+        but_ouvrir = ttk.Button(frame_boutons, text=_("Ouvrir projet"), command=fct_main.open_projet, width=15)
+        but_ouvrir.pack(side="left", padx=2, pady=2)
+        var.app_instance.create_tooltip(but_ouvrir, _("Ouvrir un projet existant"))
 def creer_list_chapitre(frame1):
     # Créer un style personnalisé
     style = ttk.Style()
@@ -96,7 +100,7 @@ def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl, corrig
     bold_button.pack(side="left", padx=2, pady=2)
     italic_button = ttk.Button(toolbar, text=_("Italique"), command=toggle_italic)
     italic_button.pack(side="left", padx=2, pady=2)
-    sl_button = ttk.Button(toolbar, text=_("Sousligné"), command=toggle_sl)
+    sl_button = ttk.Button(toolbar, text=_("Souligné"), command=toggle_sl)
     sl_button.pack(side="left", padx=2, pady=2)
     corrige_button = ttk.Button(toolbar, text=_("Corriger"), command=corrige)
     #corrige_button.pack(side="left", padx=2, pady=2)

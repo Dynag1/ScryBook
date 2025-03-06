@@ -6,7 +6,6 @@ import tkinter.font as tkFont
 from src import var, design, fct_main, sous_fenetre, thread_maj, verif_ortho, db, languagetool
 from textblob import TextBlob
 from src.verif_ortho import CorrectionOrthographique
-from src.languagetool import correction
 from spellchecker import SpellChecker
 import re
 import gettext
@@ -46,7 +45,9 @@ class main:
         self.frame1.columnconfigure(0, weight=1)
         design.creer_bouton_haut()
 
-        self.but_chapitre = ttk.Button(self.frame1, text=_("Nouveau chapitre"), command=fct_main.nouveau_chapitre).grid(row=2, column=0, padx=5, pady=5)
+        self.but_chapitre = ttk.Button(self.frame1, text=_("Nouveau chapitre"), command=fct_main.nouveau_chapitre)
+        self.but_chapitre.grid(row=2, column=0, padx=5, pady=5)
+
         self.list_chapitre = design.creer_list_chapitre(self.frame1)
         self.list_chapitre.bind('<ButtonRelease-1>', self.item_selected)
         self.list_chapitre.bind('<Button-3>', self.right_clic)
@@ -54,9 +55,10 @@ class main:
         self.txt_resume = design.creer_zone_text_resume(self.frame1)
 
         self.toolbar = design.creer_toolbar(self.frame2)
-        self.bold_button, self.italic_button, self.sl_button, self.corrige, self.inserer_image = design.creer_boutons_toolbar(self.toolbar, self.toggle_bold, self.toggle_italic, self.toggle_sl, self.correcteur, self.inserer_image)
+        self.bold_button, self.italic_button, self.sl_button, self.corrige_button, self.inserer_image = design.creer_boutons_toolbar(
+            self.toolbar, self.toggle_bold, self.toggle_italic, self.toggle_sl, self.correction, self.inserer_image)
 
-        self.create_tooltip(self.inserer_image, "Ceci est un message d'aide")
+        #self.create_tooltip(self.bold_button, "Ceci est un message d'aide")
 
         self.text_widget = design.creer_zone_texte(self.frame2)
         self.lab_version = design.creer_label_version(self.frame_bas)
@@ -90,10 +92,11 @@ class main:
 ##### Correcteur                                                        #####
 #############################################################################
 ##### Correcteur d'orthographe
-    def correcteur(self, text_widget, spell, menu_correction):
+    def correction(self):
+
         print('11')
-        #correcteur = languagetool.correcteur(self.text_widget, spell, self.menu_correction)
-        self.correcteur = CorrectionOrthographique(self.text_widget, self.spell, self.menu_correction)
+        languagetool.TextCorrector(self.text_widget)
+        #self.correcteur = CorrectionOrthographique(self.text_widget, self.spell, self.menu_correction)
         #thread = threading.Thread(target=self.correcteur())
         #thread.start()
 
@@ -125,15 +128,19 @@ class main:
 
         # Initialiser la classe de correction orthographique
 
-        self.correcteur = CorrectionOrthographique(self.text_widget, self.spell, self.menu_correction)
+        self.correcteur1 = CorrectionOrthographique(self.text_widget, self.spell, self.menu_correction)
         # Lier les événements
-        self.text_widget.bind('<KeyRelease>', self.correcteur.verifier_orthographe)
-        self.text_widget.bind('<Button-3>', self.correcteur.afficher_menu_correction)
+        self.text_widget.bind('<KeyRelease>', self.correcteur1.verifier_orthographe)
+        self.text_widget.bind('<Button-3>', self.correcteur1.afficher_menu_correction)
 
         # Configurer le tag pour les erreurs
         self.text_widget.tag_configure("erreur", foreground="red", underline=True)
 
     def create_tooltip(self, widget, text):
+        if widget is None:
+            print("Erreur : Le widget est None")
+            return
+
         tooltip = None
 
         def show_tooltip(event=None):
@@ -154,7 +161,11 @@ class main:
             if tooltip:
                 tooltip.destroy()
                 tooltip = None
-##### Txt Mise en gras
+
+        widget.bind("<Enter>", show_tooltip)
+        widget.bind("<Leave>", hide_tooltip)
+
+    ##### Txt Mise en gras
     def toggle_bold(self):
         current_font = tk.font.Font(font=self.text_widget["font"])
         self.text_widget.tag_configure("bold",
