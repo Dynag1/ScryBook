@@ -829,7 +829,7 @@ def ouvrir_fenetre_parametres_information():
         resume.insert("1.0", data[4])
 
     else:
-        print("Aucune donnée trouvée dans la table perso")
+        print("Aucune donnée trouvée dans la table infos")
 
     def on_frame_configure(event):
         canvas.configure(scrollregion=canvas.bbox("all"))

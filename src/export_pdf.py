@@ -143,7 +143,7 @@ def create_pdf(input_files, output_file, title, subtitle, author, resume):
 
     # Ajout du résumé en dernière page
     elements.append(PageBreak())
-    elements.append(Paragraph("Résumé", title_style))
+    elements.append(Paragraph("", title_style))
     elements.append(Spacer(1, 12))
     elements.append(Paragraph(resume, resume_style))
 
@@ -156,7 +156,8 @@ def create_pdf(input_files, output_file, title, subtitle, author, resume):
                              _("Impossible d'enregistrer le fichier PDF. Vérifiez que vous avez les permissions nécessaires et que le fichier n'est pas ouvert dans un autre programme."))
         return False
     except Exception as e:
-        messagebox.showerror(_("Erreur"), f_("Une erreur s'est produite lors de la création du PDF : {str(e)}"))
+        messagebox.showerror(_("Erreur"), _("Une erreur s'est produite lors de la création du PDF : "+str(e)))
+        print(e)
         return False
 
 

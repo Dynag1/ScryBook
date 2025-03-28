@@ -31,7 +31,7 @@ class main:
         var.app_instance = self
         master.title(var.nom)
         master.geometry("800x600")
-        master.iconbitmap('src/logoSb.ico')
+        master.iconbitmap('src/logoSb.png')
         master.title("ScryBook")
         #master.state('zoomed')
         threading.Thread(target=thread_maj.main()).start()
