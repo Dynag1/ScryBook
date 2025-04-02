@@ -31,7 +31,7 @@ class main:
         var.app_instance = self
         master.title(var.nom)
         master.geometry("800x600")
-        master.iconbitmap('src/logoSb.png')
+        master.iconbitmap('logoSb.ico')
         master.title("ScryBook")
         #master.state('zoomed')
         threading.Thread(target=thread_maj.main()).start()
@@ -43,7 +43,7 @@ class main:
         self.frame1, self.frame2 = design.creer_sous_frames(self.frame_main)
         self.lab_nom_projet = tk.Label(master=self.frame1, bg=var.bg_frame_haut, text=var.nom, height=2, anchor='w')
         self.frame1.columnconfigure(0, weight=1)
-        design.creer_bouton_haut()
+        self.menubar = design.creer_bouton_haut()
 
         self.but_chapitre = ttk.Button(self.frame1, text=_("Nouveau chapitre"), command=fct_main.nouveau_chapitre)
         self.but_chapitre.grid(row=2, column=0, padx=5, pady=5)
@@ -105,36 +105,50 @@ class main:
 #############################################################################
 ##### MAJ Widget Texte
     def update_text_widget(self):
+        # Mise à jour de la langue
         self.langue()
+
         try:
+            # Configuration de la traduction
             gettext.find("ScryBook")
             traduction = gettext.translation(var.langue, localedir='src/locale', languages=[var.langue])
             traduction.install()
-        except:
+        except Exception as e:
+            # Gestion des erreurs de traduction
             gettext.install('ScryBook')
-            print("error")
+            print(f"Error during translation setup: {e}")
+
+        # Destruction du widget texte existant, si présent
         if hasattr(var, 'text_widget') and var.text_widget is not None:
             self.text_widget.destroy()
+
+        # Création d'un nouveau widget texte
         self.text_widget = design.creer_zone_texte(self.frame2)
         self.text_widget.pack(fill=tk.BOTH, expand=True)
-        self.text_widget.tag_configure("erreur", foreground="red")
-        self.text_widget.tag_configure("tag_txt", foreground=var.txt_police)
+
+        # Configuration des tags pour le style du texte
+        self.text_widget.tag_configure("erreur", foreground="red", underline=True)  # Style pour les erreurs
+        self.text_widget.tag_configure("tag_txt", foreground=var.txt_police, justify='center')  # Style général du texte
+        self.text_widget.tag_configure("justify", justify='center')  # Justification du texte
+
+        # Application des tags à tout le contenu du widget texte
         self.text_widget.tag_add("tag_txt", "1.0", "end")
-        # Créer le menu de correction
+        self.text_widget.tag_add("justify", "1.0", "end")
+
+        # Création du menu contextuel pour la correction orthographique
         self.menu_correction = tk.Menu(self.master, tearoff=0)
 
-        # Initialiser le vérificateur d'orthographe
+        # Initialisation du vérificateur d'orthographe
         self.spell = SpellChecker(language=var.langue)
 
-        # Initialiser la classe de correction orthographique
-
+        # Initialisation de la classe de correction orthographique
         self.correcteur1 = CorrectionOrthographique(self.text_widget, self.spell, self.menu_correction)
-        # Lier les événements
-        self.text_widget.bind('<KeyRelease>', self.correcteur1.verifier_orthographe)
-        self.text_widget.bind('<Button-3>', self.correcteur1.afficher_menu_correction)
 
-        # Configurer le tag pour les erreurs
-        self.text_widget.tag_configure("erreur", foreground="red", underline=True)
+        # Liaison des événements au widget texte
+        self.text_widget.bind('<KeyRelease>',
+                              self.correcteur1.verifier_orthographe)  # Vérification orthographique après frappe
+        self.text_widget.bind('<Button-3>',
+                              self.correcteur1.afficher_menu_correction)  # Affichage du menu contextuel (clic droit)
 
     def create_tooltip(self, widget, text):
         if widget is None:

@@ -125,6 +125,8 @@ def creer_zone_texte(parent):
     # Configurer une balise pour le texte avec la couleur définie dans var.txt_police
     text_widget.tag_configure("couleur_texte", foreground=var.txt_police)
     text_widget.tag_add("couleur_texte", "1.0", "end")
+    text_widget.tag_configure("justify", justify='center')
+    text_widget.tag_add("justify", "1.0", "end")
 
     return text_widget
 def creer_zone_text_resume(parent):
