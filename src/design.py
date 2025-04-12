@@ -4,8 +4,8 @@ from click import style
 from src import var, fct_main, export_pdf, export_docx, export_epub
 from tkinter import font, messagebox
 import src.sous_fenetre as sfenetre
-from tkinter import ttk
-
+from tkinter import ttk, PhotoImage
+from PIL import Image, ImageTk
 
 def question_box(title, message):
     var = messagebox.askquestion(title, message)
@@ -93,7 +93,66 @@ def creer_toolbar(parent):
     toolbar = tk.Frame(parent, bg=var.bg_frame_mid)  # Ajout de bg=var.txt_fond
     toolbar.pack(side="top", fill="x")
     return toolbar
-def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl, corrige, inserer_image):
+def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl, corrige, inserer_image, text_left1, text_center1,
+                          text_right1, text_justi1):
+    # Charger les icônes
+    def charger_image(path):
+        image = Image.open(path).resize((20, 20))  # Redimensionner à 20x20 pixels
+        return ImageTk.PhotoImage(image)
+    bold_icon = charger_image("src/img/bold.png")
+    italic_icon = charger_image("src/img/italic.png")
+    underline_icon = charger_image("src/img/underline.png")
+    correct_icon = charger_image("src/img/bold.png")
+    image_icon = charger_image("src/img/bold.png")
+    text_left = charger_image("src/img/text_left.png")
+    text_center = charger_image("src/img/text_center.png")
+    text_right = charger_image("src/img/text_right.png")
+    text_justi = charger_image("src/img/text_justify.png")
+
+    # Bouton Gras avec icône
+    bold_button = ttk.Button(toolbar, image=bold_icon, command=toggle_bold)
+    bold_button.image = bold_icon  # Préserver la référence pour éviter que l'image soit supprimée
+    bold_button.pack(side="left", padx=2, pady=2)
+
+    # Bouton Italique avec icône
+    italic_button = ttk.Button(toolbar, image=italic_icon, command=toggle_italic)
+    italic_button.image = italic_icon
+    italic_button.pack(side="left", padx=2, pady=2)
+
+    # Bouton Souligné avec icône
+    sl_button = ttk.Button(toolbar, image=underline_icon, command=toggle_sl)
+    sl_button.image = underline_icon
+    sl_button.pack(side="left", padx=2, pady=2)
+
+    # Bouton left
+    sl_button = ttk.Button(toolbar, image=text_left, command=text_left1)
+    sl_button.image = text_left
+    sl_button.pack(side="left", padx=2, pady=2)
+    # Bouton left
+    sl_button = ttk.Button(toolbar, image=text_center, command=text_center1)
+    sl_button.image = text_center
+    sl_button.pack(side="left", padx=2, pady=2)
+    # Bouton left
+    sl_button = ttk.Button(toolbar, image=text_right, command=text_right1)
+    sl_button.image = text_right
+    sl_button.pack(side="left", padx=2, pady=2)
+    # Bouton left
+    sl_button = ttk.Button(toolbar, image=text_justi, command=text_justi1)
+    sl_button.image = text_justi
+    sl_button.pack(side="left", padx=2, pady=2)
+
+    # Bouton Corriger avec icône
+    corrige_button = ttk.Button(toolbar, image=correct_icon, command=corrige)
+    corrige_button.image = correct_icon
+    #corrige_button.pack(side="left", padx=2, pady=2)
+
+    # Bouton Image avec icône
+    image_button = ttk.Button(toolbar, image=image_icon, command=inserer_image)
+    image_button.image = image_icon
+    #image_button.pack(side="left", padx=2, pady=2)
+
+    return bold_button, italic_button, sl_button, corrige_button, image_button, text_left1, text_center1, text_right1, text_justi1
+"""def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl, corrige, inserer_image):
     style = ttk.Style()
     style.configure('Black.TButton', foreground='white', background='black')
     bold_button = ttk.Button(toolbar, text=_("Gras"), command=toggle_bold, style='Black.TButton')
@@ -106,7 +165,7 @@ def creer_boutons_toolbar(toolbar, toggle_bold, toggle_italic, toggle_sl, corrig
     #corrige_button.pack(side="left", padx=2, pady=2)
     image_button = ttk.Button(toolbar, text=_("Image"), command=inserer_image)
     #image_button.pack(side="left", padx=2, pady=2)
-    return bold_button, italic_button, sl_button, corrige, image_button
+    return bold_button, italic_button, sl_button, corrige, image_button"""
 def creer_zone_texte(parent):
     # Créer un cadre pour contenir le widget Text et la barre de défilement
     if hasattr(var.app_instance, 'text_widget') and var.app_instance.text_widget.winfo_exists():

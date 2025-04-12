@@ -83,16 +83,30 @@ def exporter_textes_vers_epub():
             for ligne in lignes:
                 ligne = ligne.strip()
                 if ligne:
-                    # Regrouper les balises <b>, <u> et <i>
                     ligne = re.sub(r'<(/?)([bui])>(.*?)<(/?\2)>', r'<\1\2>\3', ligne)
                     ligne = re.sub(r'(<[bui]>)(.+?)(<\/[bui]>)', r'\1\2\3', ligne)
 
-                    if ligne.startswith('# '):  # Titre de niveau 1
+                    # Nouveau traitement des balises d'alignement
+                    style_align = ''
+                    if '<center>' in ligne or '</center>' in ligne:
+                        ligne = re.sub(r'</?center>', '', ligne).strip()
+                        style_align = 'text-align: center;'
+                    elif '<right>' in ligne or '</right>' in ligne:
+                        ligne = re.sub(r'</?right>', '', ligne).strip()
+                        style_align = 'text-align: right;'
+                    elif '<left>' in ligne or '</left>' in ligne:
+                        ligne = re.sub(r'</?left>', '', ligne).strip()
+                        style_align = 'text-align: left;'
+
+                    if ligne.startswith('# '):
                         contenu_traite += f'<h2>{ligne[2:]}</h2>'
-                    elif ligne.startswith('## '):  # Titre de niveau 2
+                    elif ligne.startswith('## '):
                         contenu_traite += f'<h3>{ligne[3:]}</h3>'
                     else:
-                        contenu_traite += f'<p>{ligne}</p>'
+                        if style_align:
+                            contenu_traite += f'<p style="{style_align}">{ligne}</p>'
+                        else:
+                            contenu_traite += f'<p>{ligne}</p>'
                 else:
                     contenu_traite += '<br/>'
 
@@ -121,9 +135,9 @@ def exporter_textes_vers_epub():
 
     try:
         epub.write_epub(fichier_sortie, livre, {})
-        fct_main.alert(f_("Le fichier DOCX a été enregistré sous : {fichier_sortie}"))
+        fct_main.alert(_(f"Le fichier DOCX a été enregistré sous : {fichier_sortie}"))
     except Exception as e:
-        fct_main.alert(f_("Une erreur est survenue : {e}"))
+        fct_main.alert(_(f"Une erreur est survenue : {e}"))
 
     # Fermer la connexion à la base de données
     conn.close()

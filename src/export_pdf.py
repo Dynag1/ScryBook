@@ -5,7 +5,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Frame
 from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER
+from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER, TA_RIGHT, TA_LEFT
 from reportlab.lib.units import cm
 from reportlab.pdfgen import canvas
 import tkinter as tk
@@ -126,14 +126,24 @@ def create_pdf(input_files, output_file, title, subtitle, author, resume):
         with open(input_file, 'r', encoding='utf-8') as file:
             lines = file.readlines()
 
+        # Ajout des styles d'alignement
+        #styles.add(ParagraphStyle(name='Justify', alignment=TA_JUSTIFY))
+        #styles.add(ParagraphStyle(name='Center', alignment=TA_CENTER))
+
+        # Gestion des balises d'alignement dans le contenu
         for line in lines:
             if line.strip():
-                if line.startswith('##'):  # Sous-titre
-                    subtitle = line.strip('#').strip()
-                    elements.append(Paragraph(subtitle, subtitle_style_content))
-                    elements.append(Spacer(1, 6))
-                elif line.startswith('#'):  # Titre de section (ignoré car déjà traité)
-                    pass
+                if '<div style="text-align: center;">' in line:
+                    line = line.replace('<div style="text-align: center;">', '').strip()
+                    elements.append(Paragraph(line, styles['Center']))
+                elif '<div style="text-align: right;">' in line:
+                    line = line.replace('<div style="text-align: right;">', '').strip()
+                    right_style = ParagraphStyle(name='Right', alignment=TA_RIGHT)
+                    elements.append(Paragraph(line, right_style))
+                elif '<div style="text-align: left;">' in line:
+                    line = line.replace('<div style="text-align: left;">', '').strip()
+                    left_style = ParagraphStyle(name='Left', alignment=TA_LEFT)
+                    elements.append(Paragraph(line, left_style))
                 else:
                     elements.append(Paragraph(line.strip(), styles['Justify']))
             else:

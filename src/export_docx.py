@@ -1,4 +1,5 @@
 from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
@@ -6,7 +7,9 @@ import sqlite3
 import os
 import tkinter as tk
 from tkinter import filedialog
+from bs4 import BeautifulSoup  # Pour analyser le HTML
 from src import var, fct_main
+
 
 def exporter_textes_vers_docx():
     # Connexion à la base de données
@@ -69,7 +72,31 @@ def exporter_textes_vers_docx():
                 elif ligne.startswith('## '):
                     document.add_heading(ligne[3:], level=3)
                 else:
-                    p = document.add_paragraph(ligne)
+                    # Utilisation de BeautifulSoup pour analyser le HTML et détecter les styles d'alignement
+                    soup = BeautifulSoup(ligne, 'html.parser')
+                    div = soup.find('div')
+
+                    if div and 'style' in div.attrs:
+                        style = div['style']
+                        alignment = None
+
+                        if 'text-align: center' in style:
+                            alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        elif 'text-align: right' in style:
+                            alignment = WD_ALIGN_PARAGRAPH.RIGHT
+                        elif 'text-align: left' in style:
+                            alignment = WD_ALIGN_PARAGRAPH.LEFT
+                        elif 'text-align: justify' in style:
+                            alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+
+                        p = document.add_paragraph(div.text.strip())
+                        if alignment is not None:
+                            p.alignment = alignment
+
+                    else:
+                        p = document.add_paragraph(ligne)
+
+                    # Gestion des balises de style (<b>, <i>, <u>)
                     for run in p.runs:
                         if '<b>' in run.text:
                             run.bold = True
@@ -77,6 +104,7 @@ def exporter_textes_vers_docx():
                             run.italic = True
                         if '<u>' in run.text:
                             run.underline = True
+
                         run.text = run.text.replace('<b>', '').replace('</b>', '')
                         run.text = run.text.replace('<i>', '').replace('</i>', '')
                         run.text = run.text.replace('<u>', '').replace('</u>', '')
@@ -99,11 +127,11 @@ def exporter_textes_vers_docx():
     # Sauvegarder le document
     try:
         document.save(fichier_sortie)
-        fct_main.alert(_("Le fichier DOCX a été enregistré sous :" ))
+        fct_main.alert(_("Le fichier DOCX a été enregistré sous :"))
+        print(f"Le fichier DOCX a été enregistré sous : {fichier_sortie}")
     except Exception as e:
-        fct_main.alert(_("Une erreur est survenue : ")+e)
-        print("Une erreur est survenue : "+e)
-    print(f"Le fichier DOCX a été enregistré sous : {fichier_sortie}")
+        fct_main.alert(_("Une erreur est survenue : ") + str(e))
+        print("Une erreur est survenue :", e)
 
     # Fermer la connexion à la base de données
     conn.close()

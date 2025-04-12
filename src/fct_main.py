@@ -30,6 +30,7 @@ def creer_dossier(nom):
     dossier = Path(chemin_dossier)
     if not dossier.exists():
         dossier.mkdir(parents=True, exist_ok=True)
+
 ##### Nouveau Projet #####
 def projet_new():
     if var.dossier_projet != "":
@@ -61,6 +62,7 @@ def projet_new():
             open_projet()
     else:
         alert(_("Opération annulée."))
+
 ##### Ouvrir un projet #####
 def open_projet():
     if var.dossier_projet != "":
@@ -100,6 +102,7 @@ def open_projet():
         fct()
         thread = threading.Thread(target=enregistrement_auto)
         thread.start()
+
 ##### Enregistrement auto #####
 def enregistrement_auto(tk=None):
     tourne = True
@@ -113,6 +116,7 @@ def enregistrement_auto(tk=None):
         threading.Thread(target=save_projet()).start()
         print("save")
         time.sleep(var.save_time)
+
 def close_projet():
     var.dossier_projet = ""
     var.nom = ""
@@ -137,15 +141,26 @@ def close_projet():
 def save_projet():
     if var.chapitre != "":
         def get_formatted_content(self):
+            import tkinter as tk
+
             content = []
             for index in range(1, int(self.index(tk.END).split('.')[0])):
                 line_start = f"{index}.0"
                 line_end = f"{index}.end"
                 line = self.get(line_start, line_end)
                 formatted_line = ""
+
+                # Récupération des balises d'alignement au début de la ligne
+                alignment_tags = [tag for tag in self.tag_names(line_start)
+                                  if tag in ("left", "right", "center", "justify")]
+                alignment = alignment_tags[0] if alignment_tags else None
+
+                # Formatage des caractères
                 for i, char in enumerate(line):
                     char_index = f"{index}.{i}"
                     tags = self.tag_names(char_index)
+
+                    # Applique les styles de texte
                     if "bold" in tags and "italic" in tags and "underline" in tags:
                         formatted_line += f"<b><i><u>{char}</u></i></b>"
                     elif "bold" in tags and "italic" in tags:
@@ -162,8 +177,14 @@ def save_projet():
                         formatted_line += f"<u>{char}</u>"
                     else:
                         formatted_line += char
+
+                # Ajoute l'alignement si nécessaire
+                if alignment:
+                    formatted_line = f'<div style="text-align: {alignment};">{formatted_line}</div>'
+
                 content.append(formatted_line)
-            return "\n".join(content).rstrip('\n')  # Supprime le dernier \n
+
+            return "\n".join(content).rstrip('\n')
 
         with open(var.dossier_projet+"/"+var.chapitre, "w", encoding='utf-8') as f:
             content = get_formatted_content(var.app_instance.text_widget)
@@ -205,7 +226,6 @@ def save_projet_image():
         finally:
             progress_window.after(2000, progress_window.destroy)
 
-
 def get_formatted_content_image(text_widget, progress_bar, progress_label):
     content = []
     total_chars = int(text_widget.index(tk.END).split('.')[0])
@@ -241,7 +261,6 @@ def get_formatted_content_image(text_widget, progress_bar, progress_label):
 
     return ''.join(content)
 
-
 def format_text_chunk(text_widget, start_index, text_chunk):
     formatted_chunk = ""
     for i, char in enumerate(text_chunk):
@@ -251,26 +270,37 @@ def format_text_chunk(text_widget, start_index, text_chunk):
         formatted_chunk += formatted_char
     return formatted_chunk
 
-
 def format_char(char, tags):
+    # Appliquer les styles de mise en forme (gras, italique, souligné)
     if "bold" in tags and "italic" in tags and "underline" in tags:
-        return f"<b><i><u>{char}</u></i></b>"
+        formatted_char = f"<b><i><u>{char}</u></i></b>"
     elif "bold" in tags and "italic" in tags:
-        return f"<b><i>{char}</i></b>"
+        formatted_char = f"<b><i>{char}</i></b>"
     elif "bold" in tags and "underline" in tags:
-        return f"<b><u>{char}</u></b>"
+        formatted_char = f"<b><u>{char}</u></b>"
     elif "italic" in tags and "underline" in tags:
-        return f"<i><u>{char}</u></i>"
+        formatted_char = f"<i><u>{char}</u></i>"
     elif "bold" in tags:
-        return f"<b>{char}</b>"
+        formatted_char = f"<b>{char}</b>"
     elif "italic" in tags:
-        return f"<i>{char}</i>"
+        formatted_char = f"<i>{char}</i>"
     elif "underline" in tags:
-        return f"<u>{char}</u>"
+        formatted_char = f"<u>{char}</u>"
     else:
-        return char
+        formatted_char = char
 
+    # Appliquer les styles d'alignement (gauche, droite, centré, justifié)
+    if "align-left" in tags:
+        return f'<div style="text-align: left;">{formatted_char}</div>'
+    elif "align-right" in tags:
+        return f'<div style="text-align: right;">{formatted_char}</div>'
+    elif "align-center" in tags:
+        return f'<div style="text-align: center;">{formatted_char}</div>'
+    elif "align-justify" in tags:
+        return f'<div style="text-align: justify;">{formatted_char}</div>'
 
+    # Retourner le texte formaté sans alignement si aucun alignement n'est spécifié
+    return formatted_char
 
 def save_image(image):
     try:
@@ -309,51 +339,77 @@ def save_image(image):
         print(f"Erreur lors de la sauvegarde de l'image : {str(e)}")
         return None
 
-
 ##### Nouveau Chapitre #####
 def nouveau_chapitre():
     sous_fenetre.fenetre_chapitre()
 ##### Ouvrir un projet
 def apply_formatted_content(text_widget, content):
-    #text_widget.delete('1.0', tk.END)  # Efface le contenu actuel
-    lines = content.split('\n')
-    for line in lines:
-        start_index = text_widget.index(tk.INSERT)
-        in_bold = False
-        in_italic = False
-        in_underline = False
-        i = 0
-        while i < len(line):
-            if line[i:].startswith('<b>'):
-                in_bold = True
-                i += 3
-            elif line[i:].startswith('</b>'):
-                in_bold = False
-                i += 4
-            elif line[i:].startswith('<i>'):
-                in_italic = True
-                i += 3
-            elif line[i:].startswith('</i>'):
-                in_italic = False
-                i += 4
-            elif line[i:].startswith('<u>'):
-                in_underline = True
-                i += 3
-            elif line[i:].startswith('</u>'):
-                in_underline = False
-                i += 4
-            else:
-                text_widget.insert(tk.INSERT, line[i])
-                end_index = text_widget.index(tk.INSERT)
-                if in_bold:
-                    text_widget.tag_add("bold", start_index, end_index)
-                if in_italic:
-                    text_widget.tag_add("italic", start_index, end_index)
-                if in_underline:
-                    text_widget.tag_add("underline", start_index, end_index)
-                start_index = end_index
-                i += 1
-        text_widget.insert(tk.INSERT, '\n')
+
+    # Configuration des tags AVANT l'insertion du texte
+    text_widget.tag_configure("left", justify=tk.LEFT)
+    text_widget.tag_configure("right", justify=tk.RIGHT)
+    text_widget.tag_configure("center", justify=tk.CENTER)
+    #text_widget.tag_configure("justify", justify=tk.JUSTIFY)
+
+
+    # Efface le contenu actuel
+    text_widget.delete('1.0', tk.END)
+
+    for line in content.split('\n'):
+        alignment = None
+        clean_line = line
+
+        # Détection de l'alignement
+        if line.startswith('<div style="text-align:'):
+            if 'left' in line:
+                alignment = "left"
+            elif 'right' in line:
+                alignment = "right"
+            elif 'center' in line:
+                alignment = "center"
+            elif 'justify' in line:
+                alignment = "justify"
+            clean_line = line.split('>', 1)[1].replace('</div>', '')  # Nettoie la ligne
+
+        # Début de la ligne actuelle
+        line_start = text_widget.index(tk.INSERT)
+
+        # Insertion du texte
+        _insert_formatted_text(text_widget, clean_line)
+
+        # Application de l'alignement sur toute la ligne
+        if alignment:
+            line_end = text_widget.index(f"{line_start} lineend")
+            text_widget.tag_add(alignment, line_start, line_end)
+
+def _insert_formatted_text(text_widget, line):
+    in_bold = in_italic = in_underline = False
+    i = 0
+
+    while i < len(line):
+        if line[i:].startswith('<b>'):
+            in_bold, i = True, i + 3
+        elif line[i:].startswith('</b>'):
+            in_bold, i = False, i + 4
+        elif line[i:].startswith('<i>'):
+            in_italic, i = True, i + 3
+        elif line[i:].startswith('</i>'):
+            in_italic, i = False, i + 4
+        elif line[i:].startswith('<u>'):
+            in_underline, i = True, i + 3
+        elif line[i:].startswith('</u>'):
+            in_underline, i = False, i + 4
+        else:
+            # Insertion caractère par caractère avec tags
+            pos = text_widget.index(tk.INSERT)
+            text_widget.insert(tk.INSERT, line[i])
+            if in_bold: text_widget.tag_add("bold", pos, tk.INSERT)
+            if in_italic: text_widget.tag_add("italic", pos, tk.INSERT)
+            if in_underline: text_widget.tag_add("underline", pos, tk.INSERT)
+            i += 1
+
+    text_widget.insert(tk.INSERT, '\n')  # Saut de ligne final
+
 def ouvrir_chapitre(id):
     var.chapitre = id
     try:
@@ -369,7 +425,8 @@ def ouvrir_chapitre(id):
         var.app_instance.update_txt_resume()
         var.app_instance.txt_resume.insert(1.0, resume)
     except Exception as e:
-        tk.messagebox.showerror(_("Erreur"), f_("Impossible d'ouvrir le fichier : {str(e)}"))
+        tk.messagebox.showerror(_("Erreur"), _("Impossible d'ouvrir le fichier : ")+str(e))
+
 ##### Supprimer le chapite #####
 def delete_chapitre(id, chapitre):
     chemin_fichier = var.dossier_projet+"/"+id

@@ -55,8 +55,11 @@ class main:
         self.txt_resume = design.creer_zone_text_resume(self.frame1)
 
         self.toolbar = design.creer_toolbar(self.frame2)
-        self.bold_button, self.italic_button, self.sl_button, self.corrige_button, self.inserer_image = design.creer_boutons_toolbar(
-            self.toolbar, self.toggle_bold, self.toggle_italic, self.toggle_sl, self.correction, self.inserer_image)
+        (self.bold_button, self.italic_button, self.sl_button, self.corrige_button, self.inserer_image, self.text_left,
+         self.text_center,self.text_right, self.text_justi)\
+            = design.creer_boutons_toolbar(self.toolbar, self.toggle_bold, self.toggle_italic, self.toggle_sl,
+                                           self.correction, self.inserer_image, self.text_left, self.text_center, self.text_right
+                                           ,self.text_justi)
 
         #self.create_tooltip(self.bold_button, "Ceci est un message d'aide")
 
@@ -80,13 +83,31 @@ class main:
 ##### Récupérer le fichier langue
     def get_lang(self):
         try:
-            var.langue = db.tab_param_lire("langue")
-            gettext.find("ScryBook")
-            traduction = gettext.translation(var.langue, localedir='src/locale', languages=[var.langue])
+            # Détection du chemin de base (normal ou depuis un exécutable PyInstaller)
+            if getattr(sys, 'frozen', False):  # Vérifie si le script est exécuté depuis un exe
+                base_path = sys._MEIPASS
+            else:
+                base_path = os.getcwd()
+
+            # Récupération de la langue via param_gene
+            langue = param_gene.lang()
+            var.langue = langue
+
+            # Chemin vers le dossier contenant les fichiers de traduction
+            localedir = os.path.join(base_path, 'src/locale')
+
+            # Chargement des traductions
+            traduction = gettext.translation(var.langue, localedir=localedir, languages=[var.langue])
             traduction.install()
-        except:
+
+        except Exception as e:
+            # Gestion des erreurs : affichage d'un message d'erreur et fallback sur gettext par défaut
+            error_message = f"Error: {str(e)}"
+            #design.alert(error_message)  # Affiche l'erreur dans l'interface utilisateur
+            print(error_message)  # Affiche l'erreur dans la console
+
+            # Fallback : installation de gettext sans fichier de traduction spécifique
             gettext.install('ScryBook')
-            print("error")
 
 #############################################################################
 ##### Correcteur                                                        #####
@@ -269,6 +290,59 @@ class main:
                 print(f"Image insérée à la position {position_curseur} : {chemin_fichier}")
             except Exception as e:
                 print(f"Erreur lors de l'insertion de l'image : {e}")
+    def text_left(self):
+        try:
+            # Récupérer les indices du texte sélectionné
+            sel_start = self.text_widget.index("sel.first")
+            sel_end = self.text_widget.index("sel.last")
+
+            # Configurer le tag pour centrer le texte
+            self.text_widget.tag_configure("left", justify="left")
+
+            # Appliquer le tag au texte sélectionné
+            self.text_widget.tag_add("left", sel_start, sel_end)
+        except tk.TclError:
+            print("Aucun texte sélectionné.")
+
+    def text_center(self):
+        try:
+            # Récupérer les indices du texte sélectionné
+            sel_start = self.text_widget.index("sel.first")
+            sel_end = self.text_widget.index("sel.last")
+
+            # Configurer le tag pour centrer le texte
+            self.text_widget.tag_configure("center", justify="center")
+
+            # Appliquer le tag au texte sélectionné
+            self.text_widget.tag_add("center", sel_start, sel_end)
+        except tk.TclError:
+            print("Aucun texte sélectionné.")
+    def text_right(self):
+        try:
+            # Récupérer les indices du texte sélectionné
+            sel_start = self.text_widget.index("sel.first")
+            sel_end = self.text_widget.index("sel.last")
+
+            # Configurer le tag pour centrer le texte
+            self.text_widget.tag_configure("right", justify="right")
+
+            # Appliquer le tag au texte sélectionné
+            self.text_widget.tag_add("right", sel_start, sel_end)
+        except tk.TclError:
+            print("Aucun texte sélectionné.")
+    def text_justi(self):
+        try:
+            # Récupérer les indices du texte sélectionné
+            sel_start = self.text_widget.index("sel.first")
+            sel_end = self.text_widget.index("sel.last")
+
+            # Configurer le tag pour centrer le texte
+            self.text_widget.tag_configure("justify", justify="left")
+
+            # Appliquer le tag au texte sélectionné
+            self.text_widget.tag_add("justify", sel_start, sel_end)
+        except tk.TclError:
+            print("Aucun texte sélectionné.")
 
     #############################################################################
 ##### Ouvrir projet                                                     #####

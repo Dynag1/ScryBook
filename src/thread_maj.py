@@ -4,7 +4,7 @@ import os
 import urllib3
 import xmltodict
 import tkinter as Tk
-from src import var, design, tMaj
+from src import var, design
 import requests
 import subprocess
 
